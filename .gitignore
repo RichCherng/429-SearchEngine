@@ -1,4 +1,4 @@
 /*.json
-/bin/*
 /*.swp
-bin/*
+/bin/*.class
+

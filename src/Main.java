@@ -10,8 +10,20 @@ public class Main {
 
 		ArrayList<Document.Article> articles = doc.getDocument();
 
+		/** For purpose of developing **/
 		for(Document.Article a: articles){
-			System.out.println(a.title);
+			String title 	= a.title;
+			String url 		= a.url;
+			String body 	= a.body;
+
+			TokenStream scan = new TokenStream(a.body);
+			while(scan.hasNextToken()){
+				System.out.print(scan.nextToken() + ',');
+			}
+
+
+
+			break;
 		}
 	}
 }

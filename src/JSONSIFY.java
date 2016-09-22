@@ -9,13 +9,13 @@ import com.google.gson.stream.JsonReader;
 
 public class JSONSIFY {
 
-	private Gson gson = null;
-	private JsonReader reader = null;
+	private Gson mGson = null;
+	private JsonReader mReader = null;
 
 	public JSONSIFY(String fileName){
-		gson = new Gson();
+		mGson = new Gson();
 		try{
-			reader = new JsonReader(new FileReader(fileName));
+			mReader = new JsonReader(new FileReader(fileName));
 		} catch (FileNotFoundException e){
 			e.printStackTrace();
 		} catch(IOException e){
@@ -24,7 +24,7 @@ public class JSONSIFY {
 	}
 
 	public Document read(){
-		return gson.fromJson(reader, Document.class);
+		return mGson.fromJson(mReader, Document.class);
 	}
 
 }
