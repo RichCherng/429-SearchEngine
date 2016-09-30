@@ -1,3 +1,4 @@
+import java.sql.Time;
 import java.util.ArrayList;
 
 public class Main {
@@ -30,11 +31,24 @@ public class Main {
 //			break;
 //		}
 
-		DocumentReader docReader = new DocumentReader();
-		PositionalInvertedIndex PII = new PositionalInvertedIndex();
 
+
+		DocumentReader docReader 	= new DocumentReader();
+		PositionalInvertedIndex PII = new PositionalInvertedIndex();
 		docReader.read("all-nps-sites.json");
+		createIndex(docReader, PII);
+
+
+
+//		ArrayList<String> vocab = PII.getVocab();
+//		for(String v : vocab){
+//			PII.PrintPosting(v);
+//		}
+	}
+
+	public static void createIndex(DocumentReader docReader, PositionalInvertedIndex PII){
 		int num_doc = docReader.size();
+		System.out.println("Number of documents: " + num_doc);
 		for(int id = 0; id < num_doc; id++){
 
 			Document.Article article = docReader.get(id);
@@ -43,33 +57,23 @@ public class Main {
 			while(scan.hasNextToken()){
 				String token = scan.nextToken();
 
+				if(token == null){
+					continue;
+				}
 				// Check if token contain hypen
 				if(token.contains("-")){
+					/* Deal term with hyphen */
 
 				} else {
 					String stem = PorterStemmer.processToken(token);
-					System.out.print(token + " : ");
-					System.out.println(stem);
-
+//					System.out.print(token + " : ");
+//					System.out.println(stem);
 					PII.addTerm(stem, id, positionIndex);
-
 				}
-
 //				System.out.print(token + ":");
-
 				positionIndex++;
+
 			}
-
-
-			// Control input
-			if( id == 5){
-				break;
-			}
-		}
-
-		ArrayList<String> vocab = PII.getVocab();
-		for(String v : vocab){
-			PII.PrintPosting(v);
 		}
 	}
 }
