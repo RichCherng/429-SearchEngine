@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class Main {
 
 
@@ -29,7 +31,6 @@ public class Main {
 //		}
 
 		DocumentReader docReader = new DocumentReader();
-		PorterStemmer stemmer = new PorterStemmer();
 		PositionalInvertedIndex PII = new PositionalInvertedIndex();
 
 		docReader.read("all-nps-sites.json");
@@ -46,11 +47,15 @@ public class Main {
 				if(token.contains("-")){
 
 				} else {
+					String stem = PorterStemmer.processToken(token);
+					System.out.print(token + " : ");
+					System.out.println(stem);
 
+					PII.addTerm(stem, id, positionIndex);
 
 				}
 
-				System.out.print(token + ":");
+//				System.out.print(token + ":");
 
 				positionIndex++;
 			}
