@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class PositionalInvertedIndex {
@@ -20,11 +21,34 @@ public class PositionalInvertedIndex {
 
 		} else {
 			/* Create Posting */
-			Posting newPosting = new Posting();
+			Posting newPosting 	= new Posting();
 			mIndex.put(token, newPosting);
-			posting = newPosting;
+			posting 			= newPosting;
 		}
 		posting.add(documentID, position);
+	}
+
+	public ArrayList<String> getVocab(){
+		ArrayList<String> vocab = new ArrayList<String>();
+		for(String key: mIndex.keySet()){
+			vocab.add(key);
+		}
+		Collections.sort(vocab);
+		return vocab;
+
+	}
+
+	public void PrintPosting(String token){
+		Posting p = mIndex.get(token);
+		System.out.print(token + ": ");
+		for(PositionMap m: p.mPositions){
+			System.out.print("< " + m.mDocID + ",[ ");
+			for(int i: m.mPosition){
+				System.out.print(i+", ");
+			}
+			System.out.print("]>, ");
+		}
+		System.out.println();
 	}
 
 	class Posting{
@@ -57,29 +81,6 @@ public class PositionalInvertedIndex {
 				/* already exist */
 				map.add(position);
 			}
-
-//			if (mPositions.size() == 0){
-//				/* Empty */
-//
-//				// Create a map
-//				PositionMap newMap = new PositionMap(docID);
-//				newMap.add(position);
-//				mPositions.add(newMap);
-//			} else {
-//
-//				// Check if alraedy exist
-//				PositionMap pos = mPositions.get(mPositions.size() - 1);
-//				if (pos.mDocID == docID){
-//					/* Already Exist */
-//					// just add
-//				} else {
-//					// Create a new Map
-//
-//					PositionMap newMap = new PositionMap(docID);
-//					newMap.add(position);
-//					mPositions.add(newMap);
-//				}
-//			}
 		}
 	}
 

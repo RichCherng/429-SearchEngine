@@ -59,7 +59,17 @@ public class Main {
 
 				positionIndex++;
 			}
-			break;
+
+
+			// Control input
+			if( id == 5){
+				break;
+			}
+		}
+
+		ArrayList<String> vocab = PII.getVocab();
+		for(String v : vocab){
+			PII.PrintPosting(v);
 		}
 	}
 }
