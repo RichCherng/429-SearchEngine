@@ -35,14 +35,20 @@ public class Main {
 
 		DocumentReader docReader 	= new DocumentReader();
 		PositionalInvertedIndex PII = new PositionalInvertedIndex();
+		QueryParser querie;
 		docReader.read("all-nps-sites.json");
 		createIndex(docReader, PII);
 
+		querie =  new QueryParser( docReader, PII);
+
+		querie.run();
 
 
 //		ArrayList<String> vocab = PII.getVocab();
 //		for(String v : vocab){
 //			PII.PrintPosting(v);
+
+
 //		}
 	}
 
@@ -74,6 +80,12 @@ public class Main {
 				positionIndex++;
 
 			}
+
+			// Temporary stop indexing
+			if(id > 3000){
+				break;
+			}
 		}
+		System.out.println("Indexing completed");
 	}
 }
