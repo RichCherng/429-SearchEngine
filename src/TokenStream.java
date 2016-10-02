@@ -22,9 +22,20 @@ public class TokenStream {
 		   return null;
 	   }
 
-	   String next = mReader.next().replaceAll("[^\\w-]+" , "").toLowerCase();
+//	   String next = mReader.next().replaceAll("[^\\w-]+" , "").toLowerCase();
+//	   String next = mReader.next().replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase();
+	   String pString = process(mReader.next());
+//	   if(next.equals("__")){
+//		   System.out.println("yes");
+//		   System.out.println(next);
+//		   System.out.println("RICH_PONGSA-THO&RN".replaceAll("[^a-zA-Z0-9-]+" , ""));
+//	   }
 
-	   return next.length() > 0 ? next : (hasNextToken()? nextToken() : null);
+	   return pString.length() > 0 ? pString : (hasNextToken()? nextToken() : null);
 
+   }
+
+   public static String process(String words){
+	   return words.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase();
    }
 }
