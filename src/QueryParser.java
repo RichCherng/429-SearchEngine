@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QueryParser {
 
@@ -15,29 +17,129 @@ public class QueryParser {
 
 	}
 
+	/**
+	 *	Start accepting user input and parsing queries
+	 *	@return None
+	 */
 	public void run(){
 
 		String line;
 		System.out.print("Enter querie: ");
 		while(scanner.hasNextLine()){
 			line = scanner.nextLine();
+			if(line.length() == 0){
+				System.out.println("Empty Query");
+				continue;
+			}
+
 			if(line.charAt(0) == ':'){
+				/* Check for special query */
 
 				if(line.length() == 1){
 					/* empty arguments*/
+
 					System.out.println("empty argument");
 				} else if (specialQuerie(line)){ // True = exit
 					/* Special Querie*/
+
 					System.out.println("Exit Program");
 					break;
 				}
 			} else{
-				System.out.println("Need to be implemented");
+				/* Normal Query */
+
+				String[] ORQueries = line.split("\\+"); // Split by OR to merge those first
+				ArrayList<Posting> QList = new ArrayList<Posting>();
+				for(String q : ORQueries){
+					QList.add(querie(q.replaceAll("^\\s+", ""))); // get rid of leading space
+				}
+
+				/* Do ORMerge with all QList*/
+
+
+				for(Posting p : QList){
+					if(p == null){
+						continue;
+					}
+					for(PositionMap pm : p.mPositions){
+						System.out.println(pm.mDocID);
+					}
+				}
+
+
+//				ArrayList<String> list = new ArrayList<String>();
+//				Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
+//				while (m.find()){
+//					list.add(m.group(1));
+//				}
+//
+//
+//				for(String s: list){
+//					System.out.println(s); // Add .replaceAll("\"", "") to remove surrounding quotes.
+//				}
+//				querie(list);
+
 			}
 
 			System.out.print("Enter querie: ");
 		}
 	}
+
+	/**
+	 * Get posting and do positionalMerge if it's a phase query
+	 * @param q
+	 * @return posting
+	 */
+	public Posting querie(String q){
+
+		Posting rePosting = null;
+
+		ArrayList<String> wordList = new ArrayList<String>();
+		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(q);
+		while(m.find()){
+			wordList.add(m.group(1));
+		}
+
+		for(String s: wordList){
+//			System.out.println(s.replaceAll("\"", ""));
+			if(s.contains("\"")){
+				/* Phase Query */
+
+			} else {
+				/* Word Query */
+				Posting p = PII.getPosting(s);
+				if(rePosting == null){
+					rePosting = p;
+				} else {
+					rePosting.merge(p);
+				}
+			}
+
+			/**
+			 * For each string in this list, get posting and do positionial merge
+			 */
+		}
+
+		return rePosting;
+
+//		ArrayList<PositionalInvertedIndex.Posting> posting = new ArrayList<PositionalInvertedIndex.Posting>();
+//		while(qLiteral.size() > 0){
+//			String literal = qLiteral.remove(qLiteral.size() - 1);
+//
+//			if(literal.contains(" ")){
+//				/* Phase Query */
+//				literal = literal.replaceAll("\"", "");
+//				String[] phase = literal.split("\\s+");
+//			} else {
+//				/* IFF the literal is a word */
+//				posting.add(PII.getPosting(literal));
+//
+//			}
+//			// if literal is a word, do querie
+//		}
+	}
+
+
 
 
 	/**

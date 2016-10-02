@@ -41,6 +41,8 @@ public class Main {
 
 		querie =  new QueryParser( docReader, PII);
 
+
+//		System.out.println(docReader.get(1026).body);
 		querie.run();
 
 
