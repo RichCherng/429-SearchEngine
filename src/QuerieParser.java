@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class QuerieParser {
@@ -51,7 +50,7 @@ public class QuerieParser {
 		if(arg.equals("q")){
 			return true;
 		} else {
-//			System.out.println(arg);
+			//			System.out.println(arg);
 			String[] args 	= arg.split("\\s++");
 			String cmd 		= args[0];
 
@@ -68,11 +67,11 @@ public class QuerieParser {
 			} else if (cmd.equals("vocab")){
 				/* Print all terms in the vocabulary of the corpus, one term per line.
 				 * Then print the count of the total number of vocabulary terms. */
-				ArrayList<String> vocab = PII.getVocab();
+				String[] vocab = PII.getSortedListOfVocab();
 				for(String v : vocab){
 					System.out.println(v);
 				}
-				System.out.println("Total number of vocabulary terms: " + vocab.size());
+				System.out.println("Total number of vocabulary terms: " + vocab.length);
 
 			} else {
 				System.out.println("Command Not Found.");

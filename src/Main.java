@@ -1,69 +1,28 @@
-import java.sql.Time;
-import java.util.ArrayList;
-
 public class Main {
 
-
 	public static void main(String[] args){
-
-//		JSONSIFY parseJSON 	= new JSONSIFY("all-nps-sites.json");
-//		Document doc 		= parseJSON.read();
-//
-//		ArrayList<Document.Article> document = new ArrayList<Document.Article>();
-//
-//		ArrayList<Document.Article> articles = doc.getDocument();
-
-
-
-//		/** For purpose of developing **/
-//		for(Document.Article a: articles){
-//			String title 	= a.title;
-//			String url 		= a.url;
-//			String body 	= a.body;
-//
-//			TokenStream scan = new TokenStream(a.body);
-//			while(scan.hasNextToken()){
-//				System.out.print(scan.nextToken() + ',');
-//			}
-//
-//
-//
-//			break;
-//		}
-
-
-
 		DocumentReader docReader 	= new DocumentReader();
-		PositionalInvertedIndex PII = new PositionalInvertedIndex();
-		QueryParser querie;
-		docReader.read("all-nps-sites.json");
-		createIndex(docReader, PII);
-
-		querie =  new QueryParser( docReader, PII);
-
-
-//		System.out.println(docReader.get(1026).body);
-		querie.run();
-
-
-//		ArrayList<String> vocab = PII.getVocab();
-//		for(String v : vocab){
-//			PII.PrintPosting(v);
-
-
-//		}
+		PositionalInvertedIndex aPII = new PositionalInvertedIndex();
+		// Store each articles in the ArrayList of Document.Article
+		docReader.read("test.json");
+		// Create Positional Inverted Index from the list of articles
+		createIndex(docReader, aPII);
+		QueryParser querie =  new QueryParser(docReader, aPII);
+		querie.leafRun();
 	}
 
-	public static void createIndex(DocumentReader docReader, PositionalInvertedIndex PII){
-		int num_doc = docReader.size();
+	public static void createIndex(DocumentReader pDocReader, PositionalInvertedIndex pPII){
+		int num_doc = pDocReader.size();
 		System.out.println("Number of documents: " + num_doc);
 		for(int id = 0; id < num_doc; id++){
-
-			Document.Article article = docReader.get(id);
-			TokenStream scan = new TokenStream(article.body);
+			Document.Article article = pDocReader.get(id);
+			TokenStream aTokenStream = new TokenStream(article.body);
 			int positionIndex = 0;
-			while(scan.hasNextToken()){
-				String token = scan.nextToken();
+			while(aTokenStream.hasNextToken()){
+				// Return a processed token (all alpha-numeric characters are removed) (the '-' does not get removed)
+				//  The apostropes (single quotes) are removed also.
+				//  The token returned are already loweredCase
+				String token = aTokenStream.nextToken();
 
 				if(token == null){
 					continue;
@@ -71,18 +30,22 @@ public class Main {
 				// Check if token contain hypen
 				if(token.contains("-")){
 					/* Deal term with hyphen */
-
+					/**
+					 * Three outputs from Hewlett-Packard: HewlettPackard, Hewlett, and Packard
+					 */
+					String tokenWithOutHyphen = token.replace("-", "");
+					String firstWord = token.split("-")[0];
+					String secondWord = token.split("-")[1];
+					String[] listOfProcessedTokens = {tokenWithOutHyphen, firstWord, secondWord};
+					for (String eachProcessedToken : listOfProcessedTokens) {
+						pPII.addTerm(PorterStemmer.processToken(eachProcessedToken), id, positionIndex);
+					}
 				} else {
 					String stem = PorterStemmer.processToken(token);
-//					System.out.print(token + " : ");
-//					System.out.println(stem);
-					PII.addTerm(stem, id, positionIndex);
+					pPII.addTerm(stem, id, positionIndex);
 				}
-//				System.out.print(token + ":");
 				positionIndex++;
-
 			}
-
 			// Temporary stop indexing
 			if(id > 3000){
 				break;

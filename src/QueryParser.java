@@ -1,185 +1,214 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class QueryParser {
 
-	private DocumentReader docReader;
-	private PositionalInvertedIndex PII;
-	private Scanner scanner;
+	private DocumentReader mDocReader;
+	private PositionalInvertedIndex mPII;
+	private Scanner mScanner;
 
 	public QueryParser(DocumentReader reader, PositionalInvertedIndex p){
-
-		docReader 	= reader;
-		PII 		= p;
-		scanner = new Scanner(System.in);
-
+		mDocReader 	= reader;
+		mPII 		= p;
+		mScanner = new Scanner(System.in);
 	}
 
-	/**
-	 *	Start accepting user input and parsing queries
-	 *	@return None
-	 */
-	public void run(){
-
-		String line;
-		System.out.print("Enter querie: ");
-		while(scanner.hasNextLine()){
-			line = scanner.nextLine();
-			if(line.length() == 0){
-				System.out.println("Empty Query");
-				continue;
-			}
-
-			if(line.charAt(0) == ':'){
-				/* Check for special query */
-
-				if(line.length() == 1){
-					/* empty arguments*/
-
-					System.out.println("empty argument");
-				} else if (specialQuerie(line)){ // True = exit
-					/* Special Querie*/
-
-					System.out.println("Exit Program");
+	public void leafRun() {
+		String inputLine;
+		System.out.print("Enter queries: ");
+		while(mScanner.hasNextLine()) {
+			inputLine = mScanner.nextLine();
+			// Special queries, don't have to worry about error checking
+			if (inputLine.charAt(0) == ':') {
+				// If the query is ":q", then exit the program
+				if (inputLine.substring(1).equals("q")) {
+					System.out.println("Exiting the program");
 					break;
 				}
-			} else{
-				/* Normal Query */
-
-				String[] ORQueries = line.split("\\+"); // Split by OR to merge those first
-				ArrayList<Posting> QList = new ArrayList<Posting>();
-				for(String q : ORQueries){
-					QList.add(querie(q.replaceAll("^\\s+", ""))); // get rid of leading space
+				// Otherwise, do the special query command
+				else {
+					this.specialQuery(inputLine.substring(1));
 				}
-
-				/* Do ORMerge with all QList*/
-
-
-				for(Posting p : QList){
-					if(p == null){
-						continue;
-					}
-					for(PositionMap pm : p.mPositions){
-						System.out.println(pm.mDocID);
-					}
-				}
-
-
-//				ArrayList<String> list = new ArrayList<String>();
-//				Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(line);
-//				while (m.find()){
-//					list.add(m.group(1));
-//				}
-//
-//
-//				for(String s: list){
-//					System.out.println(s); // Add .replaceAll("\"", "") to remove surrounding quotes.
-//				}
-//				querie(list);
-
 			}
-
-			System.out.print("Enter querie: ");
+			// Normal query
+			else {
+				// Example of query:  Q1 + Q2 + Q3
+				// Q1 can be:   shakes "Jamba Juice"
+				// Q1 can be:	shakes + smoothies mango
+				String[] queriesArr = inputLine.split("\\+"); // Split all the queries by "+"
+				ArrayList<Posting[]> listOfPostingList = new ArrayList<Posting[]>(); // List of Posting for each query
+				for (String eachQueryStr : queriesArr) { // For each query, store the postingList in the outer ArrayList to do AND/OR merge later
+					String processedQueryStr = eachQueryStr.trim().toLowerCase();
+					System.out.println("ProcessedQuery: " + processedQueryStr);
+					Posting[] termPostingList = returnPostingForQuery(processedQueryStr); // Get the final PostingList
+					listOfPostingList.add(termPostingList);
+				}
+				System.out.println("Documents containing the term:");
+				// OR together the Posting for each Qi
+				// posting1 OR posting2 OR posting3
+				SortedSet<Integer> docIdSet = orListOfPostingList(listOfPostingList);
+				for (int eachDocId : docIdSet) {
+					System.out.println(eachDocId);
+				}
+			}
+			System.out.print("Enter queries: ");
 		}
 	}
 
 	/**
-	 * Get posting and do positionalMerge if it's a phase query
-	 * @param q
-	 * @return posting
+	 * Return Posting for the query literal
+	 * Each Qi is one of the following: 1. a single token. 2. phrase query (between the "")
+	 * @param pQuery - Qi query.
+	 * 		  	Example of pQuery: shakes "Jamba Juice"
+	 * 			Example of pQuery: shakes
+	 * 			Example of pQuery: "Jamba Juice"
+	 * 			Example of pQuery: shakes shake shaked
+	 * @return - The final Posting list for the Qi
 	 */
-	public Posting querie(String q){
-
-		Posting rePosting = null;
-
-		ArrayList<String> wordList = new ArrayList<String>();
-		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(q);
-		while(m.find()){
-			wordList.add(m.group(1));
+	public Posting[] returnPostingForQuery(String pQuery) {
+		if (pQuery.charAt(0) == '-') { // If it's a NOT query
+			return handleNotOperator(pQuery);
 		}
-
-		for(String s: wordList){
-//			System.out.println(s.replaceAll("\"", ""));
-			if(s.contains("\"")){
-				/* Phase Query */
-
-			} else {
-				/* Word Query */
-				Posting p = PII.getPosting(s);
-				if(rePosting == null){
-					rePosting = p;
-				} else {
-					rePosting.merge(p);
+		// Normal Query
+		else {
+			// Split string based on space but take quoted substring as one word
+			// Ex: Query: shakes "Jamba Juice" -> Q1 (only one query)
+			// AND them together at the end
+			// Resulting list: [shakes, "Jamba Juice"]
+			ArrayList<String> wordList = new ArrayList<String>();
+			Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(pQuery);
+			while(m.find()){
+				wordList.add(m.group(1));
+			}
+			// List of posting for term in Q1
+			// Ex: Q1: shakes "Jamba Juice"
+			// Ex: Q1: shakes shaked shaking
+			// Store Posting[] for shakes, and another Posting[] for "Jamba Juice"
+			ArrayList<Posting[]> listOfPostingArr = new ArrayList<Posting[]>();
+			// Check whether it's a phrase or AND query
+			for (String eachWord : wordList) {
+				if (eachWord.charAt(0) == '\"') {
+					// Do the phrase Query
+				}
+				else { // Do the word query
+					System.out.println("doing the word: " + eachWord);
+					Posting[] termPostingList = mPII.getListOfPosting(eachWord);
+					listOfPostingArr.add(termPostingList);
 				}
 			}
-
-			/**
-			 * For each string in this list, get posting and do positionial merge
-			 */
+			// Merge all the Posting[] together using AND operator
+			return mergeListOfPostingList(listOfPostingArr);
 		}
+	}
 
-		return rePosting;
+	public Posting[] mergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
+		Posting[] finalPostingArr = pListOfPosting.get(0);
+		for (int i = 1; i < pListOfPosting.size(); i++) {
+			Posting[] currentPostingArr = pListOfPosting.get(i);
+			finalPostingArr = mergeTwoPostingArr(finalPostingArr, currentPostingArr);
+		}
+		return finalPostingArr;
+	}
 
-//		ArrayList<PositionalInvertedIndex.Posting> posting = new ArrayList<PositionalInvertedIndex.Posting>();
-//		while(qLiteral.size() > 0){
-//			String literal = qLiteral.remove(qLiteral.size() - 1);
-//
-//			if(literal.contains(" ")){
-//				/* Phase Query */
-//				literal = literal.replaceAll("\"", "");
-//				String[] phase = literal.split("\\s+");
-//			} else {
-//				/* IFF the literal is a word */
-//				posting.add(PII.getPosting(literal));
-//
-//			}
-//			// if literal is a word, do querie
-//		}
+	public Posting[] mergeTwoPostingArr(Posting[] pFirstPostingArr, Posting[] pSecPostingArr) {
+		ArrayList<Posting> mergedPostingList = new ArrayList<Posting>();
+		int firstIndex = 0;
+		int secIndex = 0;
+		while (firstIndex < pFirstPostingArr.length && secIndex < pSecPostingArr.length) {
+			Posting firstPosting = pFirstPostingArr[firstIndex];
+			Posting secPosting = pSecPostingArr[secIndex];
+			if (firstPosting.mDocID == secPosting.mDocID) {
+				mergedPostingList.add(new Posting(firstPosting.mDocID));
+				firstIndex++;
+				secIndex++;
+			}
+			else if (firstPosting.mDocID < secPosting.mDocID) {
+				firstIndex++;
+			}
+			else {
+				secIndex++;
+			}
+		}
+		Posting[] mergedPostingArr = new Posting[mergedPostingList.size()];
+		return mergedPostingList.toArray(mergedPostingArr);
+	}
+
+	/**
+	 * Return array of docId from applying OR operator to the Posting Lists
+	 * @param pListOfPosting
+	 * @return
+	 */
+	public SortedSet<Integer> orListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
+		SortedSet<Integer> docIdSet = new TreeSet<Integer>();
+		for (Posting[] eachPostingList : pListOfPosting) {
+			for (Posting eachPosting : eachPostingList) {
+				docIdSet.add(eachPosting.mDocID);
+			}
+		}
+		return docIdSet;
+	}
+	/**
+	 * Handle NOT operator. Get the posting list of the word,
+	 * 	loop thru each docId, check if it's not equal to the
+	 * 	 docId that the word occur, add to the new postingList and return it.
+	 * @param pQuery
+	 * @return
+	 */
+	public Posting[] handleNotOperator(String pQuery) {
+		if (mPII.hasTerm(pQuery.substring(1))) { // if PII has the term
+			Posting[] postingList = mPII.getListOfPosting(pQuery.substring(1)); // The array of Posting object for this query, should be sorted by docID already
+			ArrayList<Posting> listOfDocIdNotQuery = new ArrayList<Posting>(); // The list of docId's that do not contain the query (NOT query)
+			int postingListIndex = 0; // Starting index of the query's postingList
+			int postingListDocIdNum = postingList[postingListIndex].mDocID; // the starting docId in the query's posting list
+			for (int iDocId = 0; iDocId < mDocReader.size(); iDocId++) { // Looping through all docID, if the docID matches, skip,
+				if (iDocId == postingListDocIdNum) { // If the same, increment the point
+					postingListIndex++;
+				}
+				else { // If different, add to the listOfDocIdNotQuery
+					listOfDocIdNotQuery.add(new Posting(iDocId));
+				}
+				if (postingListIndex < postingList.length) {
+					postingListDocIdNum = postingList[postingListIndex].mDocID;
+				}
+			}
+			Posting[] ans = new Posting[listOfDocIdNotQuery.size()];
+			return listOfDocIdNotQuery.toArray(ans);
+		}
+		else {
+			return new Posting[0];
+		}
 	}
 
 
-
-
 	/**
-	 * Handle special queries
-	 * @param querie
-	 * @return true is program exit, oitherwise false
+	 * Handle special query
+	 * @param pQuery - The query not including the ":"
 	 */
-
-	public boolean specialQuerie(String queries){
-		String arg = queries.substring(1);
-		if(arg.equals("q")){
-			return true;
-		} else {
-//			System.out.println(arg);
-			String[] args 	= arg.split("\\s++");
-			String cmd 		= args[0];
-
-			if(cmd.equals("stem")){
-				if(args.length != 2){
-					/* Wrong number of arguments */
-					System.out.println("Wrong number of argument(s)");
-				} else {
-					/* Print stemmed token */
-					System.out.println(PorterStemmer.processToken(args[1]));
-				}
-			} else if (cmd.equals("index")){
-				/* Index the folder specified by directoryname and then begin querying it. */
-			} else if (cmd.equals("vocab")){
-				/* Print all terms in the vocabulary of the corpus, one term per line.
-				 * Then print the count of the total number of vocabulary terms. */
-				ArrayList<String> vocab = PII.getVocab();
-				for(String v : vocab){
-					System.out.println(v);
-				}
-				System.out.println("Total number of vocabulary terms: " + vocab.size());
-
-			} else {
-				System.out.println("Command Not Found.");
+	public void specialQuery(String pQuery) {
+		// If special query is vocab then print list of vocabs
+		if (pQuery.equals("vocab")) {
+			String[] vocabList = mPII.getSortedListOfVocab();
+			for (String eachVocab : vocabList) {
+				System.out.println(eachVocab);
 			}
 		}
-		return false;
+		// if it's "stem" or "index"
+		else {
+			// Split the query by space
+			// :stem token, :index directoryname
+			String[] queryList = pQuery.split("\\s+");
+			String command = queryList[0];
+			String argument = queryList[1];
+			if (command.equals("stem")) {
+				System.out.println(PorterStemmer.processToken(argument));
+			}
+			else {
+				// Do the index directory
+			}
+		}
 	}
 }
