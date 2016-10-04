@@ -76,53 +76,126 @@ public class QueryParser {
 	 * @return - The final Posting list for the Qi
 	 */
 	public Posting[] returnPostingForQuery(String pQuery) {
-		if (pQuery.charAt(0) == '-') { // If it's a NOT query
-			return handleNotOperator(pQuery);
+		//		if (pQuery.charAt(0) == '-') { // If it's a NOT query
+		//			return handleNotOperator(pQuery);
+		//		}
+		//		// Normal Query
+		//		else {
+		// Split string based on space but take quoted substring as one word
+		// Ex: Query: shakes "Jamba Juice" -> Q1 (only one query)
+		// AND them together at the end
+		// Resulting list: [shakes, "Jamba Juice"]
+		ArrayList<String> wordList = new ArrayList<String>();
+		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(pQuery);
+		while(m.find()){
+			wordList.add(m.group(1));
 		}
-		// Normal Query
+
+		// Remove all the NOT query and put it in the separate array
+		// Do the query for non-NOT query first then merge it back with the NOT
+		ArrayList<String> removeStrArr = new ArrayList<String>();
+		ArrayList<String> notQueryList = new ArrayList<String>();
+		for (int i = 0; i < wordList.size(); i++) {
+			if (wordList.get(i).contains(("-\""))) {
+				String newWord = wordList.get(i) + " " + wordList.get(i + 1);
+				notQueryList.add(newWord);
+				removeStrArr.add(wordList.get(i));
+				removeStrArr.add(wordList.get(i + 1));
+				i++;
+			}
+			// If it's a not query like -mango
+			if (wordList.get(i).charAt(0) == '-') {
+				notQueryList.add(wordList.get(i));
+				removeStrArr.add(wordList.get(i));
+			}
+		}
+
+		for (String eachIndex : removeStrArr) {
+			wordList.remove(eachIndex);
+		}
+
+		//		System.out.println("wordList: ");
+		//		for (String eachWord : wordList) {
+		//			System.out.println(eachWord);
+		//		}
+		//
+		//		System.out.println("notPhraseQList: ");
+		//		for (String eachWord : notQueryList) {
+		//			System.out.println(eachWord);
+		//		}
+
+
+		// List of posting for term in Q1
+		// Ex: Q1: shakes "Jamba Juice"
+		// Ex: Q1: shakes shaked shaking
+		// Store Posting[] for shakes, and another Posting[] for "Jamba Juice"
+		ArrayList<Posting[]> listOfPostingArr = new ArrayList<Posting[]>();
+		// Check whether it's a phrase or AND query
+		// worldList: [shaeks, "Jamba Juice"]
+		for (String eachWord : wordList) {
+			// Ex: "Jamba Juice"
+			// Ex: "Jamba The Juice"
+			if (eachWord.charAt(0) == '\"') {
+				// Do the phrase Query
+				String wordWithOutQuotes = eachWord.replaceAll("\"", ""); // Now it's ---Jamba Juice---
+				String[] wordsArr = wordWithOutQuotes.split("\\s+"); // [Jamba, Juice]
+				// Jamba: [<1,[0,7]>, <2,[3]>, <3,[6]>]
+				// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
+				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
+				for (String eachStr : wordsArr) {
+					eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+				}
+				// Now we've got Posting[] of each word
+				listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList));
+			}
+			else { // Do the word query
+				Posting[] termPostingList = mPII.getListOfPosting(eachWord);
+				if (termPostingList != null) {
+					listOfPostingArr.add(termPostingList);
+				}
+			}
+		}
+		// Merge all the Posting[] together using AND operator
+		Posting[] finalNormalPosting = new Posting[0];
+		if (wordList.size() > 0) {
+			finalNormalPosting = mergeListOfPostingList(listOfPostingArr, wordList.size());
+		}
+
+		ArrayList<Posting[]> listOfNotPostingArr = new ArrayList<Posting[]>();
+		for (String eachNotWord : notQueryList) {
+			if (eachNotWord.contains("-\"")) {
+				// remove the quotation marks
+				String wordWithOutQuotes = eachNotWord.substring(1).replaceAll("\"", "");
+				String[] wordsArr = wordWithOutQuotes.split("\\s+");
+				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
+				for (String eachStr : wordsArr) {
+					eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+				}
+				listOfNotPostingArr.add(returnNotPosting(phraseMergeListOfPostingList(eachWordPostingList)));
+			}
+			// normal NOT query (non-quote)
+			else {
+				Posting[] termPostingList = handleNotOperator(eachNotWord);
+				if (termPostingList != null) {
+					listOfNotPostingArr.add(termPostingList);
+				}
+			}
+		}
+		if (notQueryList.size() > 0) {
+			Posting[] finalNotPosting = mergeListOfPostingList(listOfNotPostingArr, notQueryList.size());
+			//			System.out.println("finalNotPosting: ");
+			//			for (Posting aPosting : finalNotPosting) {
+			//				System.out.println(aPosting);
+			//			}
+			if (wordList.size() > 0)
+				return mergeTwoPostingArr(finalNormalPosting, finalNotPosting);
+			else
+				return finalNotPosting;
+		}
 		else {
-			// Split string based on space but take quoted substring as one word
-			// Ex: Query: shakes "Jamba Juice" -> Q1 (only one query)
-			// AND them together at the end
-			// Resulting list: [shakes, "Jamba Juice"]
-			ArrayList<String> wordList = new ArrayList<String>();
-			Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(pQuery);
-			while(m.find()){
-				wordList.add(m.group(1));
-			}
-			// List of posting for term in Q1
-			// Ex: Q1: shakes "Jamba Juice"
-			// Ex: Q1: shakes shaked shaking
-			// Store Posting[] for shakes, and another Posting[] for "Jamba Juice"
-			ArrayList<Posting[]> listOfPostingArr = new ArrayList<Posting[]>();
-			// Check whether it's a phrase or AND query
-			// worldList: [shaeks, "Jamba Juice"]
-			for (String eachWord : wordList) {
-				// Ex: "Jamba Juice"
-				// Ex: "Jamba The Juice"
-				if (eachWord.charAt(0) == '\"') {
-					// Do the phrase Query
-					String wordWithOutQuotes = eachWord.replaceAll("\"", ""); // Now it's ---Jamba Juice---
-					String[] wordsArr = wordWithOutQuotes.split("\\s+"); // [Jamba, Juice]
-					// Jamba: [<1,[0,7]>, <2,[3]>, <3,[6]>]
-					// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
-					ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
-					for (String eachStr : wordsArr) {
-						eachWordPostingList.add(mPII.getListOfPosting(eachStr));
-					}
-					// Now we've got Posting[] of each word
-					listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList));
-				}
-				else { // Do the word query
-					Posting[] termPostingList = mPII.getListOfPosting(eachWord);
-					if (termPostingList != null) {
-						listOfPostingArr.add(termPostingList);
-					}
-				}
-			}
-			// Merge all the Posting[] together using AND operator
-			return mergeListOfPostingList(listOfPostingArr, wordList.size());
+			return finalNormalPosting;
 		}
+		//		}
 	}
 
 	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
@@ -265,8 +338,27 @@ public class QueryParser {
 			return listOfDocIdNotQuery.toArray(ans);
 		}
 		else {
-			return new Posting[0];
+			return null;
 		}
+	}
+	public Posting[] returnNotPosting(Posting[] pPosting) {
+		Posting[] postingList = pPosting;
+		ArrayList<Posting> listOfDocIdNotQuery = new ArrayList<Posting>(); // The list of docId's that do not contain the query (NOT query)
+		int postingListIndex = 0; // Starting index of the query's postingList
+		int postingListDocIdNum = postingList[postingListIndex].mDocID; // the starting docId in the query's posting list
+		for (int iDocId = 0; iDocId < mDocReader.size(); iDocId++) { // Looping through all docID, if the docID matches, skip,
+			if (iDocId == postingListDocIdNum) { // If the same, increment the point
+				postingListIndex++;
+			}
+			else { // If different, add to the listOfDocIdNotQuery
+				listOfDocIdNotQuery.add(new Posting(iDocId));
+			}
+			if (postingListIndex < postingList.length) {
+				postingListDocIdNum = postingList[postingListIndex].mDocID;
+			}
+		}
+		Posting[] ans = new Posting[listOfDocIdNotQuery.size()];
+		return listOfDocIdNotQuery.toArray(ans);
 	}
 
 
