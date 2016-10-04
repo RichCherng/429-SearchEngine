@@ -25,13 +25,10 @@ public class DirectoryParser {
 	 * Go through all the documents in the directory and parse it into docReader.
 	 * @return true-if successful, otherwise false.
 	 */
-	public boolean parseDirectory(){
+	public boolean parseDirectory(String pDir){
 
-		Scanner reader = new Scanner(System.in);
-	    System.out.print("Put in directory name: ");
-	    String line = reader.nextLine();
-//	    reader.close();
-	    Path directory = Paths.get(line).toAbsolutePath();
+
+	    Path directory = Paths.get(pDir).toAbsolutePath();
 
 		if(!Files.exists(directory)){
 			System.out.println("Directory doesn't exists");

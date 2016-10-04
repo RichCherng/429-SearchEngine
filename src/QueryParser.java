@@ -9,11 +9,15 @@ public class QueryParser {
 
 	private DocumentReader mDocReader;
 	private PositionalInvertedIndex mPII;
+	private DirectoryParser mDir;
+	private BiwordIndex mBI;
 	private Scanner mScanner;
 
-	public QueryParser(DocumentReader reader, PositionalInvertedIndex p){
+	public QueryParser(DocumentReader reader, PositionalInvertedIndex p, BiwordIndex pB, DirectoryParser pDir){
 		mDocReader 	= reader;
 		mPII 		= p;
+		mBI			= pB;
+		mDir 		= pDir;
 		mScanner = new Scanner(System.in);
 	}
 	// run
@@ -281,6 +285,7 @@ public class QueryParser {
 			for (String eachVocab : vocabList) {
 				System.out.println(eachVocab);
 			}
+			System.out.println("Total Number of vocabs: " + vocabList.length);
 		}
 		// if it's "stem" or "index"
 		else {
@@ -294,6 +299,10 @@ public class QueryParser {
 			}
 			else {
 				// Do the index directory
+				mPII.reset();
+				mBI.reset();
+				mDir.parseDirectory(argument);
+
 			}
 		}
 	}

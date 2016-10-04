@@ -49,4 +49,11 @@ public class BiwordIndex {
 		String key = pFirstToken + "-" + pSecondToken;
 		return mTermToPostingListHM.get(key);
 	}
+
+	/**
+	 * Reset the index
+	 */
+	public void reset(){
+		mTermToPostingListHM.clear();
+	}
 }

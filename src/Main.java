@@ -1,6 +1,12 @@
+import java.util.Scanner;
+
 public class Main {
 
 	public static void main(String[] args){
+
+		Scanner reader = new Scanner(System.in);
+	    System.out.print("Put in directory name: ");
+	    String dir = reader.nextLine();
 
 		PositionalInvertedIndex aPII 		= new PositionalInvertedIndex();
 		BiwordIndex aBI 					= new BiwordIndex();
@@ -9,10 +15,10 @@ public class Main {
 
 		// Store each articles in the ArrayList of Document.Article
 //		docReader.read("all-nps-sites.json");
-		aDirectoryParser.parseDirectory();
+		aDirectoryParser.parseDirectory(dir);
 		// Create Positional Inverted Index from the list of articles
 //		createIndex(docReader, aPII, aBI);
-		QueryParser querie =  new QueryParser(docReader, aPII);
+		QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
 		querie.leafRun();
 
 
