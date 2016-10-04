@@ -170,6 +170,8 @@ public class QueryParser {
 						}
 						Posting[] aPostingList = new Posting[postingArr.size()];
 						eachWordPostingList.add(postingArr.toArray(aPostingList));
+					} else {
+						return null;
 					}
 				}
 				else {
@@ -231,9 +233,9 @@ public class QueryParser {
 	}
 
 	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting, int numOfPostingList) {
-		if (pListOfPosting.size() != numOfPostingList) {
-			return null;
-		}
+//		if (pListOfPosting.size() != numOfPostingList) {
+//			return null;
+//		}
 		// If the phrase query is just one word then return this one
 		Posting[] finalPostingArr = pListOfPosting.get(0);
 		// Combine each 2 into 1 PostingList until the second to last
