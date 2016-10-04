@@ -64,6 +64,7 @@ public class QueryParser {
 					for (int eachDocId : docIdSet) {
 						System.out.println(eachDocId);
 					}
+					System.out.println("total results: " + docIdSet.size());
 
 					System.out.print("Insert document ID to view document or insert negative number to skip: ");
 					int viewID = Integer.parseInt(mScanner.nextLine());
@@ -162,7 +163,8 @@ public class QueryParser {
 				// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
 				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
 				if (wordsArr.length == 2) {
-					ArrayList<Integer> docIdArr = mBI.getPosting(wordsArr[0].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase(), wordsArr[1].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
+
+					ArrayList<Integer> docIdArr = mBI.getPosting(PorterStemmer.processToken(wordsArr[0].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase()), PorterStemmer.processToken(wordsArr[1].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase()));
 					ArrayList<Posting> postingArr = new ArrayList<Posting>();
 					if (docIdArr != null) {
 						for (Integer docId : docIdArr) {
@@ -176,13 +178,16 @@ public class QueryParser {
 				}
 				else {
 					for (String eachStr : wordsArr) {
-						eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+						String str = PorterStemmer.processToken(eachStr);
+						eachWordPostingList.add(mPII.getListOfPosting(str));
 					}
 				}
 				// Now we've got Posting[] of each word
 				listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList, wordList.size()));
 			}
 			else { // Do the word query
+				// Porter stemm here
+				eachWord = PorterStemmer.processToken(eachWord);
 				Posting[] termPostingList = mPII.getListOfPosting(eachWord);
 				if (termPostingList != null) {
 					listOfPostingArr.add(termPostingList);
@@ -203,13 +208,14 @@ public class QueryParser {
 				String[] wordsArr = wordWithOutQuotes.split("\\s+");
 				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
 				for (String eachStr : wordsArr) {
-					eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+
+					eachWordPostingList.add(mPII.getListOfPosting(PorterStemmer.processToken(eachStr)));
 				}
 				listOfNotPostingArr.add(returnNotPosting(phraseMergeListOfPostingList(eachWordPostingList, wordList.size())));
 			}
 			// normal NOT query (non-quote)
 			else {
-				Posting[] termPostingList = handleNotOperator(eachNotWord);
+				Posting[] termPostingList = handleNotOperator(PorterStemmer.processToken(eachNotWord));
 				if (termPostingList != null) {
 					listOfNotPostingArr.add(termPostingList);
 				}

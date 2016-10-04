@@ -60,8 +60,8 @@ public class DocumentReader {
 						aPII.addTerm(PorterStemmer.processToken(eachProcessedToken), docID, positionIndex);
 
 					}
-					String stemFirst 	= PorterStemmer.processToken(firstWord);
-					String stemSecond 	= PorterStemmer.processToken(secondWord);
+					String stemFirst 	= PorterStemmer.processToken(firstWord.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
+					String stemSecond 	= PorterStemmer.processToken(secondWord.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
 					aBI.addTerm(stemFirst, stemSecond, docID); // Added Biword for the hyphened word
 					aBI.addTerm(prevTerm, stemFirst, docID); // Added Biword for previous word and first word
 					stem = stemSecond; // This will eventually make second word a prev for the next word to do Biword indexing
