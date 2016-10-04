@@ -60,6 +60,17 @@ public class QueryParser {
 					for (int eachDocId : docIdSet) {
 						System.out.println(eachDocId);
 					}
+
+					System.out.print("Insert document ID to view document or insert negative number to skip: ");
+					int viewID = Integer.parseInt(mScanner.nextLine());
+					if(viewID >= 0){
+						if(viewID < mDocReader.size()){
+							System.out.println(mDocReader.get(viewID).body);
+						} else {
+							System.out.println("Document ID doesn't exists");
+						}
+
+					}
 				}
 				else {
 					System.out.println("No document containing the query");
