@@ -290,7 +290,7 @@ public class QueryParser {
 			String command = queryList[0];
 			String argument = queryList[1];
 			if (command.equals("stem")) {
-				System.out.println(PorterStemmer.processToken(argument));
+				System.out.println(PorterStemmer.processToken(argument.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase()));
 			}
 			else {
 				// Do the index directory
