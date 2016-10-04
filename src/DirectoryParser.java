@@ -13,8 +13,8 @@ public class DirectoryParser {
 	// This get a current path of the directory
 	final Path currentWorkingPath = Paths.get("").toAbsolutePath();
 
-	public DirectoryParser(DocumentReader reader){
-		docReader = reader;
+	public DirectoryParser(DocumentReader pDocReader){
+		docReader = pDocReader;
 	}
 
 
@@ -52,14 +52,8 @@ public class DirectoryParser {
 	             BasicFileAttributes attrs) {
 	               // only process .txt files
 	               if (file.toString().endsWith(".json")) {
-
-//	                  buildDictionary(file, dictionary);
-//	                  files.add(file.getFileName().toString());
-//	            	   System.out.println(file.toString());
 	            	   System.out.println(file.toString());
 	            	   docReader.read(file.toString());
-
-
 	               }
 	               return FileVisitResult.CONTINUE;
 	            }

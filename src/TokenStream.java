@@ -9,9 +9,9 @@ public class TokenStream {
 	}
 
 	/**
-   Returns true if the stream has tokens remaining.
+	 *
+	 * @return true if the stream has tokens remaining.
 	 */
-
 	public boolean hasNextToken() {
 		return mReader.hasNext();
 	}
@@ -27,7 +27,7 @@ public class TokenStream {
 		return pString.length() > 0 ? pString : (hasNextToken()? nextToken() : null);
 	}
 
-	public static String process(String words){
-		return words.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase();
+	public static String process(String pWords){
+		return pWords.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase();
 	}
 }
