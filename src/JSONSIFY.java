@@ -23,8 +23,12 @@ public class JSONSIFY {
 		}
 	}
 
-	public Document read(){
-		return mGson.fromJson(mReader, Document.class);
+	/**
+	 * Read json file
+	 * @return Article class with parsed json content
+	 */
+	public Article read(){
+		return mGson.fromJson(mReader, Article.class);
 	}
 
 }

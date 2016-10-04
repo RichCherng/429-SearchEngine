@@ -12,6 +12,13 @@ public class PositionalInvertedIndex {
 	}
 
 	/**
+	 * Reset the whole index
+	 */
+	public void reset(){
+		mTermToPostingListHM = new HashMap<String, ArrayList<Posting>>();
+	}
+
+	/**
 	 * Add term to the Positional Inverted Index
 	 * @param pToken - A processed token
 	 * @param pDocumentId - current document ID
