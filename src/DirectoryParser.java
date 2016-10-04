@@ -76,7 +76,7 @@ public class DirectoryParser {
 			return false;
 		}
 
-		System.out.println("Parse documents completed");
+		System.out.println("Parse and index documents completed");
 		return true;
 	}
 }

@@ -289,6 +289,10 @@ public class QueryParser {
 	}
 
 	public Posting[] mergeTwoPostingArr(Posting[] pFirstPostingArr, Posting[] pSecPostingArr) {
+		// If one of the posting doesn't exists, cannot merge
+		if(pFirstPostingArr == null || pSecPostingArr == null){
+			return null;
+		}
 		ArrayList<Posting> mergedPostingList = new ArrayList<Posting>();
 		int firstIndex = 0;
 		int secIndex = 0;
