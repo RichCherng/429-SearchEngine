@@ -96,11 +96,6 @@ public class QueryParser {
 	 * @return - The final Posting list for the Qi
 	 */
 	public Posting[] returnPostingForQuery(String pQuery) {
-		//		if (pQuery.charAt(0) == '-') { // If it's a NOT query
-		//			return handleNotOperator(pQuery);
-		//		}
-		//		// Normal Query
-		//		else {
 		// Split string based on space but take quoted substring as one word
 		// Ex: Query: shakes "Jamba Juice" -> Q1 (only one query)
 		// AND them together at the end
@@ -134,17 +129,6 @@ public class QueryParser {
 			wordList.remove(eachIndex);
 		}
 
-		//		System.out.println("wordList: ");
-		//		for (String eachWord : wordList) {
-		//			System.out.println(eachWord);
-		//		}
-		//
-		//		System.out.println("notPhraseQList: ");
-		//		for (String eachWord : notQueryList) {
-		//			System.out.println(eachWord);
-		//		}
-
-
 		// List of posting for term in Q1
 		// Ex: Q1: shakes "Jamba Juice"
 		// Ex: Q1: shakes shaked shaking
@@ -162,11 +146,15 @@ public class QueryParser {
 				// Jamba: [<1,[0,7]>, <2,[3]>, <3,[6]>]
 				// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
 				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
+				// Do the Biword Index
 				if (wordsArr.length == 2) {
-
-					ArrayList<Integer> docIdArr = mBI.getPosting(PorterStemmer.processToken(wordsArr[0].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase()), PorterStemmer.processToken(wordsArr[1].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase()));
+					// Get docIDs for the two word (Biword)
+					String firstWord = PorterStemmer.processToken(wordsArr[0].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
+					String secondWord = PorterStemmer.processToken(wordsArr[1].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
+					ArrayList<Integer> docIdArr = mBI.getPosting(firstWord, secondWord);
 					ArrayList<Posting> postingArr = new ArrayList<Posting>();
 					if (docIdArr != null) {
+						// Construct Posting object then add to posting array
 						for (Integer docId : docIdArr) {
 							postingArr.add(new Posting(docId));
 						}
@@ -177,8 +165,10 @@ public class QueryParser {
 					}
 				}
 				else {
+					// for each of the word in the phrase
 					for (String eachStr : wordsArr) {
 						String str = PorterStemmer.processToken(eachStr);
+						// Get the postingList of each word in the phrase
 						eachWordPostingList.add(mPII.getListOfPosting(str));
 					}
 				}
@@ -205,15 +195,16 @@ public class QueryParser {
 			if (eachNotWord.contains("-\"")) {
 				// remove the quotation marks
 				String wordWithOutQuotes = eachNotWord.substring(1).replaceAll("\"", "");
+				// Split the word by space
 				String[] wordsArr = wordWithOutQuotes.split("\\s+");
 				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
 				for (String eachStr : wordsArr) {
-
 					eachWordPostingList.add(mPII.getListOfPosting(PorterStemmer.processToken(eachStr)));
 				}
+				// Get the list of posting for each word in phrase, do positional merge them and do NOT operator on it
 				listOfNotPostingArr.add(returnNotPosting(phraseMergeListOfPostingList(eachWordPostingList, wordList.size())));
 			}
-			// normal NOT query (non-quote)
+			// normal NOT query (non-quote) (just a word)
 			else {
 				Posting[] termPostingList = handleNotOperator(PorterStemmer.processToken(eachNotWord));
 				if (termPostingList != null) {
@@ -235,13 +226,12 @@ public class QueryParser {
 		else {
 			return finalNormalPosting;
 		}
-		//		}
 	}
 
 	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting, int numOfPostingList) {
-//		if (pListOfPosting.size() != numOfPostingList) {
-//			return null;
-//		}
+		//		if (pListOfPosting.size() != numOfPostingList) {
+		//			return null;
+		//		}
 		// If the phrase query is just one word then return this one
 		Posting[] finalPostingArr = pListOfPosting.get(0);
 		// Combine each 2 into 1 PostingList until the second to last
@@ -277,7 +267,7 @@ public class QueryParser {
 				while (firstPositionIndex < firstPositionArr.size() && secPositionIndex < secPositionArr.size()) {
 					int currentFirstPosition = firstPositionArr.get(firstPositionIndex);
 					int currentSecPosition = secPositionArr.get(secPositionIndex);
-					// while the first position is greater than the second position, move the
+					// while the first position is greater than the second position, move the second position
 					while (currentFirstPosition >= currentSecPosition) {
 						secPositionIndex++;
 						if (secPositionIndex >= secPositionArr.size()) {
@@ -350,7 +340,7 @@ public class QueryParser {
 	/**
 	 * Return array of docId from applying OR operator to the Posting Lists
 	 * @param pListOfPosting
-	 * @return
+	 * @return Sorted Set of docID
 	 */
 	public SortedSet<Integer> orListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
 		SortedSet<Integer> docIdSet = new TreeSet<Integer>();
@@ -366,7 +356,7 @@ public class QueryParser {
 	 * 	loop thru each docId, check if it's not equal to the
 	 * 	 docId that the word occur, add to the new postingList and return it.
 	 * @param pQuery
-	 * @return
+	 * @return - Posting list of the query after NOT operator
 	 */
 	public Posting[] handleNotOperator(String pQuery) {
 		if (mPII.hasTerm(pQuery.substring(1))) { // if PII has the term
@@ -393,6 +383,7 @@ public class QueryParser {
 		}
 	}
 	public Posting[] returnNotPosting(Posting[] pPosting) {
+		// If posting is null, return the postingList with all docId (revert of empty)
 		if(pPosting == null){
 			Posting aPosting;
 			ArrayList<Posting> tempPost = new ArrayList<Posting>();
