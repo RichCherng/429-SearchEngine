@@ -79,7 +79,7 @@ public class DirectoryParser {
 			return false;
 		}
 
-
+		System.out.println("Parse documents completed");
 		return true;
 	}
 }
