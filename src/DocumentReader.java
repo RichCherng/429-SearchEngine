@@ -20,7 +20,7 @@ public class DocumentReader {
 		Article aArticle = mJSONParser.read();
 		mArticles.add(aArticle);
 		index(aArticle, mArticles.indexOf(aArticle));
-//		mArticles = doc.getDocument();
+		//		mArticles = doc.getDocument();
 	}
 
 	public void index(Article pArticle, int docID){
@@ -37,8 +37,8 @@ public class DocumentReader {
 			if(token == null){
 				continue;
 			}
-//			System.out.println(token);
-//			System.out.println(aTokenStream.nextToken());
+			//			System.out.println(token);
+			//			System.out.println(aTokenStream.nextToken());
 			// Check if token contain hypen
 			if(token.contains("-") && token.length() > 3){ //a-
 
@@ -67,7 +67,7 @@ public class DocumentReader {
 					stem = stemSecond; // This will eventually make second word a prev for the next word to do Biword indexing
 
 				}
-					else {
+				else {
 					stem = PorterStemmer.processToken(token.replaceAll("-", ""));
 					aPII.addTerm(stem, docID, positionIndex);
 					if(prevTerm != null){
@@ -79,7 +79,9 @@ public class DocumentReader {
 			} else {
 				stem = PorterStemmer.processToken(token);
 				aPII.addTerm(stem, docID, positionIndex);
-
+				if(prevTerm != null){
+					aBI.addTerm( prevTerm,stem, docID);
+				}
 
 			}
 			prevTerm = stem;

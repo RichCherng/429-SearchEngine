@@ -157,11 +157,24 @@ public class QueryParser {
 				// Jamba: [<1,[0,7]>, <2,[3]>, <3,[6]>]
 				// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
 				ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
-				for (String eachStr : wordsArr) {
-					eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+				if (wordsArr.length == 2) {
+					ArrayList<Integer> docIdArr = mBI.getPosting(wordsArr[0].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase(), wordsArr[1].replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
+					ArrayList<Posting> postingArr = new ArrayList<Posting>();
+					if (docIdArr != null) {
+						for (Integer docId : docIdArr) {
+							postingArr.add(new Posting(docId));
+						}
+						Posting[] aPostingList = new Posting[postingArr.size()];
+						eachWordPostingList.add(postingArr.toArray(aPostingList));
+					}
+				}
+				else {
+					for (String eachStr : wordsArr) {
+						eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+					}
 				}
 				// Now we've got Posting[] of each word
-				listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList));
+				listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList, wordList.size()));
 			}
 			else { // Do the word query
 				Posting[] termPostingList = mPII.getListOfPosting(eachWord);
@@ -186,7 +199,7 @@ public class QueryParser {
 				for (String eachStr : wordsArr) {
 					eachWordPostingList.add(mPII.getListOfPosting(eachStr));
 				}
-				listOfNotPostingArr.add(returnNotPosting(phraseMergeListOfPostingList(eachWordPostingList)));
+				listOfNotPostingArr.add(returnNotPosting(phraseMergeListOfPostingList(eachWordPostingList, wordList.size())));
 			}
 			// normal NOT query (non-quote)
 			else {
@@ -213,7 +226,10 @@ public class QueryParser {
 		//		}
 	}
 
-	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
+	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting, int numOfPostingList) {
+		if (pListOfPosting.size() != numOfPostingList) {
+			return null;
+		}
 		// If the phrase query is just one word then return this one
 		Posting[] finalPostingArr = pListOfPosting.get(0);
 		// Combine each 2 into 1 PostingList until the second to last
