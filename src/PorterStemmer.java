@@ -99,31 +99,6 @@ public class PorterStemmer {
 	   step4Pair = Collections.unmodifiableMap(aMap);
    }
 
-   /*
-   private static String[][] step2Pair = {
-		   new String[] {"ational"	, "ate" },
-		   new String[] {"tional"	, "tion"},
-		   new String[] {"enci"		, "ence"},
-		   new String[] {"izer"		, "ize"	},
-		   new String[] {"abli"		, "able"},
-		   new String[] {"alli"		, "al"	},
-		   new String[] {"entli"	, "ent"	},
-		   new String[] {"eli"		, "e"	},
-		   new String[] {"ousli"	, "ous"	},
-		   new String[] {"ization"	, "ize"	},
-		   new String[] {"ation"	, "ate"	},
-		   new String[] {"ator"		, "ate"	},
-		   new String[] {"alism"	, "al"	},
-		   new String[] {"iveness"	, "ive"	},
-		   new String[] {"fulness" 	, "ful"	},
-		   new String[] {"ousness"	, "ous"	},
-		   new String[] {"aliti"	, "al"	},
-		   new String[] {"iviti"	, "ive"	},
-		   new String[] {"biliti"	, "ble"	}
-   };
-   */
-
-
    // add more Pattern variables for the following patterns:
    // m equals 1: token has measure == 1
    // m greater than 1: token has measure > 1

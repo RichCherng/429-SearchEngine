@@ -9,8 +9,8 @@ import com.google.gson.stream.JsonReader;
 
 public class JSONSIFY {
 
-	private Gson mGson = null;
-	private JsonReader mReader = null;
+	private Gson 		mGson 	= null;
+	private JsonReader 	mReader = null;
 
 	/**
 	 * Read json file
