@@ -167,9 +167,6 @@ public class PorterStemmer {
       // step 1b*, only if the 1b.2 or 1b.3 were performed.
       if (doStep1bb) {
 
-
-
-
          if (token.endsWith("at") || token.endsWith("bl")
           || token.endsWith("iz")) {
 
@@ -195,10 +192,6 @@ public class PorterStemmer {
     		  token = stem + 'i';
     	  }
       }
-
-
-
-
 
 
       // step 2
@@ -242,8 +235,6 @@ public class PorterStemmer {
       }
 
 
-
-
       // step 4
       // program this step similar to step 2/3, except now the stem must have
       // measure > 1.
@@ -269,9 +260,6 @@ public class PorterStemmer {
     		  token = stem;
     	  }
       }
-
-
-
 
       // step 5
       // program this step. you have a regex for m=1 and for "Cvc", which
