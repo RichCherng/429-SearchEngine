@@ -39,11 +39,10 @@ public class QueryParser {
 				// Example of query:  Q1 + Q2 + Q3
 				// Q1 can be:   shakes "Jamba Juice"
 				// Q1 can be:	shakes + smoothies mango
-				String[] queriesArr = inputLine.split("\\+"); // Split all the queries by "+"
+				String[] queriesArr = inputLine.split("\\+"); // Split all the queries by "+". The array will be [Q1,Q2,Q3,Q4,Qn]
 				ArrayList<Posting[]> listOfPostingList = new ArrayList<Posting[]>(); // List of Posting for each query
 				for (String eachQueryStr : queriesArr) { // For each query, store the postingList in the outer ArrayList to do AND/OR merge later
 					String processedQueryStr = eachQueryStr.trim().toLowerCase();
-					System.out.println("ProcessedQuery: " + processedQueryStr);
 					Posting[] termPostingList = returnPostingForQuery(processedQueryStr); // Get the final PostingList
 					listOfPostingList.add(termPostingList);
 				}
@@ -90,9 +89,22 @@ public class QueryParser {
 			// Store Posting[] for shakes, and another Posting[] for "Jamba Juice"
 			ArrayList<Posting[]> listOfPostingArr = new ArrayList<Posting[]>();
 			// Check whether it's a phrase or AND query
+			// worldList: [shaeks, "Jamba Juice"]
 			for (String eachWord : wordList) {
+				// Ex: "Jamba Juice"
+				// Ex: "Jamba The Juice"
 				if (eachWord.charAt(0) == '\"') {
 					// Do the phrase Query
+					String wordWithOutQuotes = eachWord.replaceAll("\"", ""); // Now it's ---Jamba Juice---
+					String[] wordsArr = wordWithOutQuotes.split("\\s+"); // [Jamba, Juice]
+					// Jamba: [<1,[0,7]>, <2,[3]>, <3,[6]>]
+					// Juice: [<1,[1]>, <2,[0]>, <3,[7]>, <4,[1,4]>]
+					ArrayList<Posting[]> eachWordPostingList = new ArrayList<Posting[]>();
+					for (String eachStr : wordsArr) {
+						eachWordPostingList.add(mPII.getListOfPosting(eachStr));
+					}
+					// Now we've got Posting[] of each word
+					listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList));
 				}
 				else { // Do the word query
 					System.out.println("doing the word: " + eachWord);
@@ -103,6 +115,69 @@ public class QueryParser {
 			// Merge all the Posting[] together using AND operator
 			return mergeListOfPostingList(listOfPostingArr);
 		}
+	}
+
+	public Posting[] phraseMergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
+		// If the phrase query is just one word then return this one
+		Posting[] finalPostingArr = pListOfPosting.get(0);
+		// Combine each 2 into 1 PostingList until the second to last
+		for (int i = 1; i < pListOfPosting.size(); i++) {
+			Posting[] currentPostingArr = pListOfPosting.get(i);
+			finalPostingArr = phraseMergeTwoPostingArr(finalPostingArr, currentPostingArr);
+		}
+		return finalPostingArr;
+	}
+
+	public Posting[] phraseMergeTwoPostingArr(Posting[] pFirstPostingArr, Posting[] pSecPostingArr) {
+		ArrayList<Posting> phraseMergedPostingList = new ArrayList<Posting>();
+		int firstIndex = 0;
+		int secIndex = 0;
+		while (firstIndex < pFirstPostingArr.length && secIndex < pSecPostingArr.length) {
+			Posting firstPosting = pFirstPostingArr[firstIndex];
+			Posting secPosting = pSecPostingArr[secIndex];
+			// When the two docs are the same
+			if (firstPosting.mDocID == secPosting.mDocID) {
+				// Create a new Posting with no position
+				Posting mergedPosting = new Posting(firstPosting.mDocID);
+				// firstPosition: [0,7]
+				// SecPosition: [1]
+				ArrayList<Integer> firstPositionArr = firstPosting.mPositionArr;
+				ArrayList<Integer> secPositionArr = secPosting.mPositionArr;
+				int firstPositionIndex = 0;
+				int secPositionIndex = 0;
+				// loop through each position in first postions array
+				while (firstPositionIndex < firstPositionArr.size() && secPositionIndex < secPositionArr.size()) {
+					int currentFirstPosition = firstPositionArr.get(firstPositionIndex);
+					int currentSecPosition = secPositionArr.get(secPositionIndex);
+					// while the first position is greater than the second position, move the
+					while (currentFirstPosition >= currentSecPosition) {
+						secPositionIndex++;
+						if (secPositionIndex >= secPositionArr.size()) {
+							break;
+						}
+						currentSecPosition = secPositionArr.get(secPositionIndex);
+					}
+					// Check if postion2 is right after position1
+					if (currentSecPosition == (currentFirstPosition + 1)) {
+						mergedPosting.addPosition(currentSecPosition);
+					}
+					firstPositionIndex++;
+				}
+				if (mergedPosting.mPositionArr.size() > 0) {
+					phraseMergedPostingList.add(mergedPosting);
+				}
+				firstIndex++;
+				secIndex++;
+			}
+			else if (firstPosting.mDocID > secPosting.mDocID) {
+				secIndex++;
+			}
+			else {
+				firstIndex++;
+			}
+		}
+		Posting[] ans = new Posting[phraseMergedPostingList.size()];
+		return phraseMergedPostingList.toArray(ans);
 	}
 
 	public Posting[] mergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
@@ -212,3 +287,4 @@ public class QueryParser {
 		}
 	}
 }
+
