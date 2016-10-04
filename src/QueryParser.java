@@ -16,7 +16,7 @@ public class QueryParser {
 		mPII 		= p;
 		mScanner = new Scanner(System.in);
 	}
-
+	// run
 	public void leafRun() {
 		String inputLine;
 		System.out.print("Enter queries: ");
