@@ -12,6 +12,10 @@ public class JSONSIFY {
 	private Gson mGson = null;
 	private JsonReader mReader = null;
 
+	/**
+	 * Read json file
+	 * @param fileName
+	 */
 	public JSONSIFY(String fileName){
 		mGson = new Gson();
 		try{
@@ -24,7 +28,7 @@ public class JSONSIFY {
 	}
 
 	/**
-	 * Read json file
+	 * Parse json file into object
 	 * @return Article class with parsed json content
 	 */
 	public Article read(){
