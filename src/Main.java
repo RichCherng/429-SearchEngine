@@ -3,31 +3,35 @@ public class Main {
 	public static void main(String[] args){
 
 
-		DocumentReader docReader 	= new DocumentReader();
-		DirectoryParser aDirectoryParser = new DirectoryParser(docReader);
-		PositionalInvertedIndex aPII = new PositionalInvertedIndex();
+		DocumentReader docReader 			= new DocumentReader();
+		DirectoryParser aDirectoryParser 	= new DirectoryParser(docReader);
+		PositionalInvertedIndex aPII 		= new PositionalInvertedIndex();
+		BiwordIndex aBI 					= new BiwordIndex();
 		// Store each articles in the ArrayList of Document.Article
 //		docReader.read("all-nps-sites.json");
 		aDirectoryParser.parseDirectory();
 		// Create Positional Inverted Index from the list of articles
-		createIndex(docReader, aPII);
+		createIndex(docReader, aPII, aBI);
 		QueryParser querie =  new QueryParser(docReader, aPII);
 		querie.leafRun();
 
+
 	}
 
-	public static void createIndex(DocumentReader pDocReader, PositionalInvertedIndex pPII){
+	public static void createIndex(DocumentReader pDocReader, PositionalInvertedIndex pPII, BiwordIndex pBI){
 		int num_doc = pDocReader.size();
 		System.out.println("Number of documents: " + num_doc);
 		for(int id = 0; id < num_doc; id++){
 			Article article = pDocReader.get(id);
 			TokenStream aTokenStream = new TokenStream(article.body);
 			int positionIndex = 0;
+			String prevTerm = null; // use for biword indexing to keep track of the previous word
 			while(aTokenStream.hasNextToken()){
 				// Return a processed token (all alpha-numeric characters are removed) (the '-' does not get removed)
 				//  The apostropes (single quotes) are removed also.
 				//  The token returned are already loweredCase
 				String token = aTokenStream.nextToken();
+				String stem = null;
 
 				if(token == null){
 					continue;
@@ -50,9 +54,14 @@ public class Main {
 //					}
 
 				} else {
-					String stem = PorterStemmer.processToken(token);
+					stem = PorterStemmer.processToken(token);
 					pPII.addTerm(stem, id, positionIndex);
+					if(prevTerm != null){
+						pBI.addTerm( prevTerm,stem, id);
+					}
+
 				}
+				prevTerm = stem;
 				positionIndex++;
 			}
 			// Temporary stop indexing
