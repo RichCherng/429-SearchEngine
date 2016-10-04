@@ -1,14 +1,31 @@
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+
 public class Main {
 
 	public static void main(String[] args){
-		DocumentReader docReader 	= new DocumentReader();
-		PositionalInvertedIndex aPII = new PositionalInvertedIndex();
-		// Store each articles in the ArrayList of Document.Article
-		docReader.read("all-nps-sites.json");
-		// Create Positional Inverted Index from the list of articles
-		createIndex(docReader, aPII);
-		QueryParser querie =  new QueryParser(docReader, aPII);
-		querie.leafRun();
+
+		DirectoryParser aDirectoryParser = new DirectoryParser();
+		// this gets the current working path.
+	    final Path currentWorkingPath = Paths.get("").toAbsolutePath();
+
+	    Scanner reader = new Scanner(System.in);
+	    System.out.println("Put in directory name");
+	    String line = reader.nextLine();
+//	    System.out.println(Paths.get(line).toAbsolutePath());
+	    aDirectoryParser.parseDirectory(Paths.get(line).toAbsolutePath());
+
+
+//		DocumentReader docReader 	= new DocumentReader();
+//		PositionalInvertedIndex aPII = new PositionalInvertedIndex();
+//		// Store each articles in the ArrayList of Document.Article
+//		docReader.read("all-nps-sites.json");
+//		// Create Positional Inverted Index from the list of articles
+//		createIndex(docReader, aPII);
+//		QueryParser querie =  new QueryParser(docReader, aPII);
+//		querie.leafRun();
+
 	}
 
 	public static void createIndex(DocumentReader pDocReader, PositionalInvertedIndex pPII){
