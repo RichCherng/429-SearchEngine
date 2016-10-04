@@ -60,8 +60,12 @@ public class PositionalInvertedIndex {
 	 */
 	public Posting[] getListOfPosting(String token){
 		String stem = PorterStemmer.processToken(token);
-		Posting[] listOfPostingObj = new Posting[mTermToPostingListHM.get(stem).size()];
-		return mTermToPostingListHM.get(stem).toArray(listOfPostingObj);
+		if (mTermToPostingListHM.containsKey(stem)) {
+			Posting[] listOfPostingObj = new Posting[mTermToPostingListHM.get(stem).size()];
+			return mTermToPostingListHM.get(stem).toArray(listOfPostingObj);
+		} else {
+			return null;
+		}
 	}
 
 	public boolean hasTerm(String pTerm) {
