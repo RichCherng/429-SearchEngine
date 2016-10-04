@@ -44,14 +44,21 @@ public class QueryParser {
 				for (String eachQueryStr : queriesArr) { // For each query, store the postingList in the outer ArrayList to do AND/OR merge later
 					String processedQueryStr = eachQueryStr.trim().toLowerCase();
 					Posting[] termPostingList = returnPostingForQuery(processedQueryStr); // Get the final PostingList
-					listOfPostingList.add(termPostingList);
+					if (termPostingList != null ) {
+						listOfPostingList.add(termPostingList);
+					}
 				}
-				System.out.println("Documents containing the term:");
 				// OR together the Posting for each Qi
 				// posting1 OR posting2 OR posting3
 				SortedSet<Integer> docIdSet = orListOfPostingList(listOfPostingList);
-				for (int eachDocId : docIdSet) {
-					System.out.println(eachDocId);
+				if (docIdSet.size() > 0) {
+					System.out.println("Documents containing the term:");
+					for (int eachDocId : docIdSet) {
+						System.out.println(eachDocId);
+					}
+				}
+				else {
+					System.out.println("No document containing the query");
 				}
 			}
 			System.out.print("Enter queries: ");
@@ -107,13 +114,14 @@ public class QueryParser {
 					listOfPostingArr.add(phraseMergeListOfPostingList(eachWordPostingList));
 				}
 				else { // Do the word query
-					System.out.println("doing the word: " + eachWord);
 					Posting[] termPostingList = mPII.getListOfPosting(eachWord);
-					listOfPostingArr.add(termPostingList);
+					if (termPostingList != null) {
+						listOfPostingArr.add(termPostingList);
+					}
 				}
 			}
 			// Merge all the Posting[] together using AND operator
-			return mergeListOfPostingList(listOfPostingArr);
+			return mergeListOfPostingList(listOfPostingArr, wordList.size());
 		}
 	}
 
@@ -180,7 +188,10 @@ public class QueryParser {
 		return phraseMergedPostingList.toArray(ans);
 	}
 
-	public Posting[] mergeListOfPostingList(ArrayList<Posting[]> pListOfPosting) {
+	public Posting[] mergeListOfPostingList(ArrayList<Posting[]> pListOfPosting, int numOfPostingList) {
+		if (pListOfPosting.size() != numOfPostingList) {
+			return null;
+		}
 		Posting[] finalPostingArr = pListOfPosting.get(0);
 		for (int i = 1; i < pListOfPosting.size(); i++) {
 			Posting[] currentPostingArr = pListOfPosting.get(i);
