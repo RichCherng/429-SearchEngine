@@ -26,6 +26,10 @@ public class QueryParser {
 		System.out.print("Enter queries: ");
 		while(mScanner.hasNextLine()) {
 			inputLine = mScanner.nextLine();
+			if(inputLine.length() < 1){
+				System.out.print("Enter queries: ");
+				continue;
+			}
 			// Special queries, don't have to worry about error checking
 			if (inputLine.charAt(0) == ':') {
 				// If the query is ":q", then exit the program
