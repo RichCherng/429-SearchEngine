@@ -387,6 +387,16 @@ public class QueryParser {
 		}
 	}
 	public Posting[] returnNotPosting(Posting[] pPosting) {
+		if(pPosting == null){
+			Posting aPosting;
+			ArrayList<Posting> tempPost = new ArrayList<Posting>();
+			for(int i = 0; i < mDocReader.size(); i++){
+				aPosting = new Posting(i);
+				tempPost.add(aPosting);
+			}
+			Posting[] ans = new Posting[tempPost.size()];
+			return tempPost.toArray(ans);
+		}
 		Posting[] postingList = pPosting;
 		ArrayList<Posting> listOfDocIdNotQuery = new ArrayList<Posting>(); // The list of docId's that do not contain the query (NOT query)
 		int postingListIndex = 0; // Starting index of the query's postingList
