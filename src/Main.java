@@ -4,7 +4,7 @@ public class Main {
 		DocumentReader docReader 	= new DocumentReader();
 		PositionalInvertedIndex aPII = new PositionalInvertedIndex();
 		// Store each articles in the ArrayList of Document.Article
-		docReader.read("test.json");
+		docReader.read("all-nps-sites.json");
 		// Create Positional Inverted Index from the list of articles
 		createIndex(docReader, aPII);
 		QueryParser querie =  new QueryParser(docReader, aPII);
@@ -27,19 +27,23 @@ public class Main {
 				if(token == null){
 					continue;
 				}
+//				System.out.println(token);
+//				System.out.println(aTokenStream.nextToken());
 				// Check if token contain hypen
-				if(token.contains("-")){
+				if(token.contains("-") && token.length() > 3){ //a-
 					/* Deal term with hyphen */
 					/**
 					 * Three outputs from Hewlett-Packard: HewlettPackard, Hewlett, and Packard
 					 */
-					String tokenWithOutHyphen = token.replace("-", "");
-					String firstWord = token.split("-")[0];
-					String secondWord = token.split("-")[1];
-					String[] listOfProcessedTokens = {tokenWithOutHyphen, firstWord, secondWord};
-					for (String eachProcessedToken : listOfProcessedTokens) {
-						pPII.addTerm(PorterStemmer.processToken(eachProcessedToken), id, positionIndex);
-					}
+
+//					String firstWord = token.split("-")[0];
+//					String secondWord = token.split("-")[1];
+//					String tokenWithOutHyphen = token.replace("-", "");
+//					String[] listOfProcessedTokens = {tokenWithOutHyphen, firstWord, secondWord};
+//					for (String eachProcessedToken : listOfProcessedTokens) {
+//						pPII.addTerm(PorterStemmer.processToken(eachProcessedToken), id, positionIndex);
+//					}
+
 				} else {
 					String stem = PorterStemmer.processToken(token);
 					pPII.addTerm(stem, id, positionIndex);
