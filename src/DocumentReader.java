@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DocumentReader {
 
@@ -39,25 +41,45 @@ public class DocumentReader {
 //			System.out.println(aTokenStream.nextToken());
 			// Check if token contain hypen
 			if(token.contains("-") && token.length() > 3){ //a-
-				/* Deal term with hyphen */
-				/**
-				 * Three outputs from Hewlett-Packard: HewlettPackard, Hewlett, and Packard
-				 */
 
-//				String firstWord = token.split("-")[0];
-//				String secondWord = token.split("-")[1];
-//				String tokenWithOutHyphen = token.replace("-", "");
-//				String[] listOfProcessedTokens = {tokenWithOutHyphen, firstWord, secondWord};
-//				for (String eachProcessedToken : listOfProcessedTokens) {
-//					pPII.addTerm(PorterStemmer.processToken(eachProcessedToken), id, positionIndex);
-//				}
+
+				Pattern p = Pattern.compile("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)?$"); // Pattern to look for character or number before and after hyphen
+				Matcher m = p.matcher(token);
+				if (m.find()){
+
+					/* Deal term with hyphen */
+					/**
+					 * Three outputs from Hewlett-Packard: HewlettPackard, Hewlett, and Packard
+					 */
+
+					String firstWord = token.split("-")[0];
+					String secondWord = token.split("-")[1];
+					String tokenWithOutHyphen = token.replace("-", "");
+					String[] listOfProcessedTokens = {tokenWithOutHyphen, firstWord, secondWord};
+					for (String eachProcessedToken : listOfProcessedTokens) {
+						aPII.addTerm(PorterStemmer.processToken(eachProcessedToken), docID, positionIndex);
+
+					}
+					String stemFirst 	= PorterStemmer.processToken(firstWord);
+					String stemSecond 	= PorterStemmer.processToken(secondWord);
+					aBI.addTerm(stemFirst, stemSecond, docID); // Added Biword for the hyphened word
+					aBI.addTerm(prevTerm, stemFirst, docID); // Added Biword for previous word and first word
+					stem = stemSecond; // This will eventually make second word a prev for the next word to do Biword indexing
+
+				}
+					else {
+					stem = PorterStemmer.processToken(token.replaceAll("-", ""));
+					aPII.addTerm(stem, docID, positionIndex);
+					if(prevTerm != null){
+						aBI.addTerm( prevTerm,stem, docID);
+					}
+				}
+
 
 			} else {
 				stem = PorterStemmer.processToken(token);
 				aPII.addTerm(stem, docID, positionIndex);
-				if(prevTerm != null){
-					aBI.addTerm( prevTerm,stem, docID);
-				}
+
 
 			}
 			prevTerm = stem;
