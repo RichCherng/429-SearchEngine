@@ -213,8 +213,8 @@ public class PorterStemmer {
     	    	String stem = token.substring(0, token.length() - key.length());
     	    	if (mGr0.matcher(stem).find()){
     	    		token = stem + entry.getValue();
-    	    		break;
     	    	}
+    	    	break;
     	    }
       }
 
@@ -229,8 +229,8 @@ public class PorterStemmer {
   	    	  String stem = token.substring(0, token.length() - key.length());
   	    	  if (mGr0.matcher(stem).find()){
   	    		  token = stem + entry.getValue();
-  	    		  break;
   	    	}
+  	    	break;
   	    }
       }
 
@@ -249,8 +249,8 @@ public class PorterStemmer {
     		  String stem = token.substring(0, token.length() - key.length());
     		  if(two.matcher(stem).find()){ // m > 1
     			  token = stem + step4Pair.get(key);
-    			  break;
     		  }
+    		  break;
     	  }
       }
 
