@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 /**
  * Write an inverted indexing of a directory to disk.
@@ -31,10 +32,11 @@ public class IndexWriter {
 
 		buildVocabFile(pDirectory, dictionary, vocabPositions);
 		buildPostingFile(pDirectory, pPII, dictionary, vocabPositions);
+		System.out.println("Saved Index to Disk");
 	}
 
 
-	private void buildPostingFile(String pDir, PositionalInvertedIndex index, String[] dictionary, long[] vocabPosition){
+	private void buildPostingFile(String pDir, PositionalInvertedIndex index, String[] dictionary, long[] vocabPositions){
 		FileOutputStream postingFileWriter = null;
 
 		try{
@@ -49,6 +51,48 @@ public class IndexWriter {
 			vocabTableWriter.write(tSize, 0, tSize.length);
 
 			int vocabI = 0;
+			for(String s: dictionary){
+				// Retrieve Posting for each string
+				Posting[] postings = index.getListOfPosting(s);
+
+				// write the vocab table entry for this term: the byte location of the term in the vocab list file,
+				// and the byte lcoation of the posting for hte term in the posting file.
+				byte[] vPositionBytes = ByteBuffer.allocate(8).putLong(vocabPositions[vocabI]).array();
+				vocabTableWriter.write(vPositionBytes, 0, vPositionBytes.length);
+
+				byte[] pPositionBytes = ByteBuffer.allocate(8).putLong(postingFileWriter.getChannel().position()).array();
+				vocabTableWriter.write(pPositionBytes, 0, pPositionBytes.length);
+
+				// Write the postings file for this term. First, the document frequency for the term, then
+				// the document IDs, encoded as gaps
+				byte[] docFreqBytes = ByteBuffer.allocate(4).putInt(postings.length).array();
+				postingFileWriter.write(docFreqBytes, 0, docFreqBytes.length);
+
+				int lastDocID = 0;
+				for(Posting posting : postings){
+					int docID = posting.mDocID;
+
+					// Write doc id
+					byte[] docIDByte = ByteBuffer.allocate(4).putInt(docID - lastDocID).array();
+					postingFileWriter.write(docIDByte, 0, docIDByte.length);
+
+					lastDocID = docID;
+
+					// Write term frequency
+					byte[] termFreqByte = ByteBuffer.allocate(4).putInt(posting.mPositionArr.size()).array();
+					postingFileWriter.write(termFreqByte, 0, termFreqByte.length);
+
+					// Write term positions in this doc
+					for(int pos: posting.mPositionArr){
+						// For each position
+						byte[] termPosByte = ByteBuffer.allocate(4).putInt(pos).array();
+						postingFileWriter.write(termPosByte, 0, termPosByte.length);
+					}
+				}
+				vocabI++;
+			}
+			vocabTableWriter.close();
+			postingFileWriter.close();
 
 		} catch(FileNotFoundException ex){
 			System.out.println(ex.toString());

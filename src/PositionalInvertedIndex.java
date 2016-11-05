@@ -11,6 +11,7 @@ public class PositionalInvertedIndex {
 		mTermToPostingListHM = new HashMap<String, ArrayList<Posting>>();
 	}
 
+
 	/**
 	 * Reset the whole index
 	 */
@@ -25,6 +26,9 @@ public class PositionalInvertedIndex {
 	 * @param pPosition - The position in that docID that the token occurs
 	 */
 	public void addTerm(String pToken, int pDocumentId, int pPosition){
+//		if(pToken.equals("becaus")){
+//			System.out.println(pPosition);
+//		}
 		// If contains the term
 		if (mTermToPostingListHM.containsKey(pToken)) {
 			// Get the List of the Posting of the current token
@@ -59,10 +63,11 @@ public class PositionalInvertedIndex {
 	 * @return - List of Posting
 	 */
 	public Posting[] getListOfPosting(String token){
-		String stem = PorterStemmer.processToken(token);
-		if (mTermToPostingListHM.containsKey(stem)) {
-			Posting[] listOfPostingObj = new Posting[mTermToPostingListHM.get(stem).size()];
-			return mTermToPostingListHM.get(stem).toArray(listOfPostingObj);
+//		String stem = PorterStemmer.processToken(token);
+		// This gonna break Query Parser, need to be fix
+		if (mTermToPostingListHM.containsKey(token)) {
+			Posting[] listOfPostingObj = new Posting[mTermToPostingListHM.get(token).size()];
+			return mTermToPostingListHM.get(token).toArray(listOfPostingObj);
 		} else {
 			return null;
 		}
