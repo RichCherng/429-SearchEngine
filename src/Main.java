@@ -37,6 +37,15 @@ public class Main {
 		DiskInvertedIndex aDII = new DiskInvertedIndex(dir);
 
 
+		// compare
+		Posting[] fromDisk = aDII.getPostings(PorterStemmer.processToken("park"));
+		Posting[] fromIndex = aPII.getListOfPosting(PorterStemmer.processToken("park"));
+		for(int i = 0; i < fromDisk.length; i++){
+			System.out.println(fromDisk[i]);
+			System.out.println(fromIndex[i]);
+		}
+
+
 		// Create Positional Inverted Index from the list of articles
 //		QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
 //		querie.leafRun();
