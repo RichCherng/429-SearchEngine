@@ -7,13 +7,15 @@ public class DocumentReader {
 	private JSONSIFY 		mJSONParser;
 	PositionalInvertedIndex aPII;
 	BiwordIndex 			aBI;
+	KGramIndex				aKGI;
 	ArrayList<Article> 		mArticles;
 	private final int 		MIN_LENGTH = 3;
 
-	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI){
+	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI, KGramIndex pKGI){
 		mArticles 	= new ArrayList<Article>();
 		aPII 		= pPII;
 		aBI 		= pBI;
+		aKGI 		= pKGI;
 	}
 
 	public void read(String path){
@@ -37,6 +39,8 @@ public class DocumentReader {
 			if(token == null){
 				continue;
 			}
+
+			aKGI.addType(token);
 
 			// Check if token contain hypen
 			if(token.contains("-") && token.length() > MIN_LENGTH){
