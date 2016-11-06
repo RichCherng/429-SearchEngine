@@ -44,6 +44,26 @@ public class DiskInvertedIndex {
 		return null;
 	}
 
+	/**
+	 * Get list of docIDs and the frequency of each document
+	 * @param term
+	 * @return Array of Pair object, <document ID, termFrequency>
+	 */
+	@SuppressWarnings("unchecked")
+	public Pair<Integer>[] getDocList(String term){
+
+		long postingsPosition = binarySearchVocabulary(term);
+		if (postingsPosition >= 0){
+			Posting[] posting = readPostingsFromFile(mPostings, postingsPosition);
+			Pair<Integer>[] pairs = new Pair[posting.length];
+			for(int i = 0; i < posting.length; i++){
+				pairs[i] = new Pair<Integer>(posting[i].mDocID, posting[i].mPositionArr.size());
+			}
+			return pairs;
+		}
+		return null;
+	}
+
 	private static Posting[] readPostingsFromFile(RandomAccessFile postings, long postingsPosition){
 		try{
 			// seek to the position in the file where the postings start.
@@ -203,4 +223,5 @@ public class DiskInvertedIndex {
 	public int getTermCount(){
 		return mVocabTable.length / 2;
 	}
+
 }

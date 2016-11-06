@@ -45,6 +45,10 @@ public class Main {
 			System.out.println(fromIndex[i]);
 		}
 
+		Pair<Integer>[] pairs= aDII.getDocList(PorterStemmer.processToken("park"));
+		for(Pair<Integer> p: pairs){
+			System.out.println(p.getFirst() + " : " + p.getSecond());
+		}
 
 		// Create Positional Inverted Index from the list of articles
 //		QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
