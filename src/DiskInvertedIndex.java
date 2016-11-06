@@ -58,6 +58,8 @@ public class DiskInvertedIndex {
 			Pair<Integer>[] pairs = new Pair[posting.length];
 			for(int i = 0; i < posting.length; i++){
 				pairs[i] = new Pair<Integer>(posting[i].mDocID, posting[i].mPositionArr.size());
+//				System.out.println(posting[i]);
+//				System.out.println(pairs[i]+ " ");
 			}
 			return pairs;
 		}
@@ -79,13 +81,14 @@ public class DiskInvertedIndex {
 			// initialize the array that will hold the postings.
 //			int[] docIDs = new int[documentFrequency];
 			Posting[] postingList = new Posting[documentFrequency];
+			int documentID = 0; // Handling gap encoding
 			for(int d = 0; d < documentFrequency; d++){
 
 				// Read document ID
 				postings.read(buffer, 0, buffer.length);
 				int docID = ByteBuffer.wrap(buffer).getInt();
 
-				Posting readPosting = new Posting(docID);
+				Posting readPosting = new Posting(docID + documentID); // Handling gap encoding
 				postingList[d] = readPosting;
 
 				// Read term frequency
@@ -98,6 +101,7 @@ public class DiskInvertedIndex {
 					int position = ByteBuffer.wrap(buffer).getInt();
 					readPosting.addPosition(position);
 				}
+				documentID = docID + documentID; // Handling gap encoding
 			}
 			return postingList;
 
