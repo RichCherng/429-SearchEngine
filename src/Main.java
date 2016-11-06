@@ -41,7 +41,7 @@ public class Main {
 					e.printStackTrace();
 				}
 
-//				QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
+//				QueryParser querie =  new QueryParser(aDII, aBI);
 //				querie.leafRun();
 
 				break;
