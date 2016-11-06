@@ -38,7 +38,7 @@ public class DirectoryParser {
 			System.out.println(directory.toString());
 
 			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
-
+				int docNum = 0;
 	            public FileVisitResult preVisitDirectory(Path dir,
 	             BasicFileAttributes attrs) {
 	               // make sure we only process the current working directory
@@ -52,7 +52,11 @@ public class DirectoryParser {
 	             BasicFileAttributes attrs) {
 	               // only process .txt files
 	               if (file.toString().endsWith(".json")) {
-	            	   System.out.println(file.toString());
+	            	   docNum++;
+	            	   if(docNum % 500 == 0){
+	            		   System.out.println(docNum);
+	            	   }
+//	            	   System.out.println(file.toString());
 	            	   docReader.read(file.toString());
 	               }
 	               return FileVisitResult.CONTINUE;
