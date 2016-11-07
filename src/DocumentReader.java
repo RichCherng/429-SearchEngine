@@ -10,16 +10,17 @@ public class DocumentReader {
 	private JSONSIFY 		mJSONParser;
 	PositionalInvertedIndex aPII;
 	BiwordIndex 			aBI;
+	KGramIndex				aKGI;
 	ArrayList<Article> 		mArticles;
 	private final int 		MIN_LENGTH = 3;
-
 	/** For the weight of document **/
 	LinkedHashMap<Integer, HashMap<String,Integer>> docIdToTermToTermFreq; // docID --> (term --> termFreq)
 
-	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI){
+	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI, KGramIndex pKGI){
 		mArticles 	= new ArrayList<Article>();
 		aPII 		= pPII;
 		aBI 		= pBI;
+		aKGI 		= pKGI;
 		docIdToTermToTermFreq = new LinkedHashMap<Integer, HashMap<String,Integer>>(); // docID --> (term --> termFreq)
 	}
 
@@ -84,6 +85,8 @@ public class DocumentReader {
 			if(token == null){
 				continue;
 			}
+
+			aKGI.addType(token);
 
 			// Check if token contain hypen
 			if(token.contains("-") && token.length() > MIN_LENGTH){

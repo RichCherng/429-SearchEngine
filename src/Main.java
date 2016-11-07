@@ -24,14 +24,21 @@ public class Main {
 			case 2:
 				/*** Read from Disk ***/
 				System.out.println("Enter the name of an index to read:");
-				String dir 				= reader.nextLine();
-				DiskInvertedIndex aDII 	= new DiskInvertedIndex(dir);
-				BiwordIndex aBI 		= null;
+				String 				dir  = reader.nextLine();
+				DiskInvertedIndex 	aDII = new DiskInvertedIndex(dir);
+				BiwordIndex 		aBI  = null;
+				KGramIndex 			aKGI = null;
 
 				// Read Serialized Bi-Word
 				try {
+					// Read bi-word
 					ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
 					aBI = (BiwordIndex) in.readObject();
+					in.close();
+
+					// Read k-gram
+					in = new ObjectInputStream(new FileInputStream(dir + "/kgram.in"));
+					aKGI = (KGramIndex) in.readObject();
 					in.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -41,7 +48,7 @@ public class Main {
 					e.printStackTrace();
 				}
 
-//				QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
+//				QueryParser querie =  new QueryParser(aDII, aBI);
 //				querie.leafRun();
 
 				break;
@@ -98,25 +105,36 @@ public class Main {
 		System.out.println("Enter the name of a directory to idnex:");
 		String folder = reader.nextLine();
 
-		PositionalInvertedIndex aPII 		= new PositionalInvertedIndex();
-		BiwordIndex aBI 					= new BiwordIndex();
-		DocumentReader docReader 			= new DocumentReader(aPII, aBI);
-		DirectoryParser aDirectoryParser 	= new DirectoryParser(docReader);
+		PositionalInvertedIndex aPII 			 = new PositionalInvertedIndex();
+		BiwordIndex 			aBI 			 = new BiwordIndex();
+		KGramIndex 				aKGI			 = new KGramIndex();
+		DocumentReader 			docReader 		 = new DocumentReader(aPII, aBI, aKGI);
+		DirectoryParser 		aDirectoryParser = new DirectoryParser(docReader);
 		// Store each articles in the ArrayList of Document.Article
 		aDirectoryParser.parseDirectory(folder);
+
 
 		/*** Write To Disk ****/
 		IndexWriter diskWriter = new IndexWriter();
 		diskWriter.writeToDisk(folder,aPII);
 
 		try {
+			// Write Bi-Word
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(folder+"/biword.bin"));
 			out.writeObject(aBI);
 			out.close();
+
+			// Write K-Gram
+			out = new ObjectOutputStream(new FileOutputStream(folder+"/kgram.bin"));
+			out.writeObject(aKGI);
+			out.close();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+
 
 	}
 }
