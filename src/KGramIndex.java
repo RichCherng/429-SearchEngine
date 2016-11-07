@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class KGramIndex implements Serializable {
@@ -30,10 +31,14 @@ public class KGramIndex implements Serializable {
 				}
 
 			} else if( i == cArr.length - 1){
-				/** Ending **/
+				/** Ending for 2-gram **/
 				// Add to Two-Gram
-				addToHashMap(twoGram, cArr[i]+"$", type);
-			} else {
+				addToHashMap(twoGram, "" + cArr[i]+"$", type);
+			} else if( i + 1 == cArr.length - 1){
+				/** Ending for 3-gram **/
+				// Add to Three-Gram
+				addToHashMap(threeGram, "" + cArr[i] + cArr[i+1] + "$", type);
+			}else {
 				/** Between **/
 				if( i + 2 < cArr.length){
 					// Add to Three-gram
@@ -48,6 +53,34 @@ public class KGramIndex implements Serializable {
 	}
 
 	public HashSet<String> getPossibleList(String pWord){
+		HashSet<String> posList = new HashSet<String>();
+
+		char[] cArr = pWord.toCharArray();
+		for(int i = 0; i < cArr.length; i++){
+
+			// Retrieve from one-gram
+			posList.addAll(oneGram.get(cArr[i]+""));
+
+			if(i == 0){
+				/** Starting **/
+
+				// Retrieve from Two-Gram
+				posList.addAll(twoGram.get("$"+cArr[i]));
+
+				// Retrieve from Three-Gram
+				if( i + 1 < cArr.length){
+					posList.addAll(threeGram.get("$"+cArr[i]+cArr[i+1]));
+				}
+
+			} else if (i == cArr.length - 1){
+				/** Ending **/
+
+			} else {
+				/** Between **/
+
+			}
+		}
+
 
 		return null;
 	}
@@ -67,6 +100,27 @@ public class KGramIndex implements Serializable {
 			HashSet<String> words = new HashSet<String>();
 			words.add(type);
 			hm.put(gram, words);
+		}
+	}
+
+	public void print(){
+		for (Map.Entry<String, HashSet<String>> entry : oneGram.entrySet()) {
+			System.out.println(entry.getKey());
+			for(String s: entry.getValue()){
+				System.out.println("\t" + s);
+			}
+		}
+		for (Map.Entry<String, HashSet<String>> entry : twoGram.entrySet()) {
+			System.out.println(entry.getKey());
+			for(String s: entry.getValue()){
+				System.out.println("\t" + s);
+			}
+		}
+		for (Map.Entry<String, HashSet<String>> entry : threeGram.entrySet()) {
+			System.out.println(entry.getKey());
+			for(String s: entry.getValue()){
+				System.out.println("\t" + s);
+			}
 		}
 	}
 }

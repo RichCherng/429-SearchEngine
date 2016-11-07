@@ -27,11 +27,38 @@ public class Main {
 				DiskInvertedIndex	aDII = null;
 				BiwordIndex 		aBI  = null;
 				KGramIndex			aKGI = null;
+				System.out.println("Enter the name of an index to read:");
+				String dir  = reader.nextLine();
+				aDII 		= new DiskInvertedIndex(dir);
 
-				readDirectory(reader, aDII, aBI, aKGI);
+				/** Read Serialized Objects **/
+				try {
+					// Read bi-word
+					ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
+					aBI = (BiwordIndex) in.readObject();
+					in.close();
+
+					// Read k-gram
+					in = new ObjectInputStream(new FileInputStream(dir + "/kgram.bin"));
+					aKGI = (KGramIndex) in.readObject();
+					in.close();
+				} catch (IOException e) {
+//					e.printStackTrace();
+					System.out.println("Failed Processing Serialized files");
+				} catch (ClassNotFoundException e) {
+//					e.printStackTrace();
+					System.out.println("Failed Processing Serialized files");
+				}
+
+
+//				aKGI.print();
+
 //				QueryParser querie =  new QueryParser(aDII, aBI);
 //				querie.leafRun();
 
+				/** Testing Spelling Correction **/
+				SpellingCorrection aSC = new SpellingCorrection(aKGI);
+//				System.out.println(aSC.correct("parg"));
 				break;
 		}
 
@@ -82,30 +109,6 @@ public class Main {
 
 	}
 
-	public static void readDirectory(Scanner reader, DiskInvertedIndex pDII, BiwordIndex pBI, KGramIndex pKGI ){
-		System.out.println("Enter the name of an index to read:");
-		String dir  = reader.nextLine();
-		pDII 		= new DiskInvertedIndex(dir);
-
-		/** Read Serialized Objects **/
-		try {
-			// Read bi-word
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
-			pBI = (BiwordIndex) in.readObject();
-			in.close();
-
-			// Read k-gram
-			in = new ObjectInputStream(new FileInputStream(dir + "/kgram.bin"));
-			pKGI = (KGramIndex) in.readObject();
-			in.close();
-		} catch (IOException e) {
-//			e.printStackTrace();
-			System.out.println("Failed Processing Serialized files");
-		} catch (ClassNotFoundException e) {
-//			e.printStackTrace();
-			System.out.println("Failed Processing Serialized files");
-		}
-	}
 
 	public static void indexDirectory(Scanner reader){
 		System.out.println("Enter the name of a directory to idnex:");
