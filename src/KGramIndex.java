@@ -34,7 +34,7 @@ public class KGramIndex implements Serializable {
 				// Add to Two-Gram
 				addToHashMap(twoGram, cArr[i]+"$", type);
 			} else {
-				// Between
+				/** Between **/
 				if( i + 2 < cArr.length){
 					// Add to Three-gram
 					addToHashMap(threeGram, "" + cArr[i] + cArr[i+1] + cArr[i+2], type);

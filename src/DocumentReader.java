@@ -17,23 +17,25 @@ public class DocumentReader {
 	LinkedHashMap<Integer, HashMap<String,Integer>> docIdToTermToTermFreq; // docID --> (term --> termFreq)
 
 	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI, KGramIndex pKGI){
-		mArticles 	= new ArrayList<Article>();
-		aPII 		= pPII;
-		aBI 		= pBI;
-		aKGI 		= pKGI;
-		docIdToTermToTermFreq = new LinkedHashMap<Integer, HashMap<String,Integer>>(); // docID --> (term --> termFreq)
+		mArticles 				= new ArrayList<Article>();
+		aPII 					= pPII;
+		aBI 					= pBI;
+		aKGI 					= pKGI;
+		docIdToTermToTermFreq 	= new LinkedHashMap<Integer, HashMap<String,Integer>>(); // docID --> (term --> termFreq)
 	}
 
 	public void read(String path){
-		mJSONParser = new JSONSIFY(path);
-		Article aArticle = mJSONParser.read();
+		mJSONParser 		= new JSONSIFY(path);
+		Article aArticle 	= mJSONParser.read();
+
 		mArticles.add(aArticle);
 		index(aArticle, mArticles.indexOf(aArticle));
 	}
 
 	public double[] getListOfLd() {
-		double[] listOfLd = new double[docIdToTermToTermFreq.size()];
-		int index = 0;
+		double[] listOfLd 	= new double[docIdToTermToTermFreq.size()];
+		int index 			= 0;
+
 		for (Map.Entry<Integer, HashMap<String, Integer>> eachEntry : docIdToTermToTermFreq.entrySet()) {
 			listOfLd[index] = getWeightOfDocument(eachEntry.getKey());
 			index++;
@@ -45,10 +47,11 @@ public class DocumentReader {
 		double sumOfWeightOfAllTerm = 0;
 		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); // Get all the HM of term --> termFreq
 		for (Map.Entry<String, Integer> eachEntry : termFreqHM.entrySet()) { // For each term in the document
-			int termFreqOfTermInDoc = eachEntry.getValue(); // Get the termFreq
-			double weightOfDocOfTerm = 1.0 + Math.log(termFreqOfTermInDoc); // Get the W(d,t) = 1 + ln( tf(t,d) )
-			double weightOfDocOfTermSquare = Math.pow(weightOfDocOfTerm, 2.0);
-			sumOfWeightOfAllTerm += weightOfDocOfTermSquare;
+
+			int termFreqOfTermInDoc 		= eachEntry.getValue(); // Get the termFreq
+			double weightOfDocOfTerm 		= 1.0 + Math.log(termFreqOfTermInDoc); // Get the W(d,t) = 1 + ln( tf(t,d) )
+			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);
+			sumOfWeightOfAllTerm 		   += weightOfDocOfTermSquare;
 		}
 		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
 		return Ld;
