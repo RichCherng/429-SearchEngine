@@ -23,31 +23,12 @@ public class Main {
 				break;
 			case 2:
 				/*** Read from Disk ***/
-				System.out.println("Enter the name of an index to read:");
-				String 				dir  = reader.nextLine();
-				DiskInvertedIndex 	aDII = new DiskInvertedIndex(dir);
+
+				DiskInvertedIndex	aDII = null;
 				BiwordIndex 		aBI  = null;
-				KGramIndex 			aKGI = null;
+				KGramIndex			aKGI = null;
 
-				// Read Serialized Bi-Word
-				try {
-					// Read bi-word
-					ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
-					aBI = (BiwordIndex) in.readObject();
-					in.close();
-
-					// Read k-gram
-					in = new ObjectInputStream(new FileInputStream(dir + "/kgram.in"));
-					aKGI = (KGramIndex) in.readObject();
-					in.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				readDirectory(reader, aDII, aBI, aKGI);
 //				QueryParser querie =  new QueryParser(aDII, aBI);
 //				querie.leafRun();
 
@@ -99,6 +80,31 @@ public class Main {
 //		QueryParser querie =  new QueryParser(docReader, aPII, aBI, aDirectoryParser);
 //		querie.leafRun();
 
+	}
+
+	public static void readDirectory(Scanner reader, DiskInvertedIndex pDII, BiwordIndex pBI, KGramIndex pKGI ){
+		System.out.println("Enter the name of an index to read:");
+		String dir  = reader.nextLine();
+		pDII 		= new DiskInvertedIndex(dir);
+
+		/** Read Serialized Objects **/
+		try {
+			// Read bi-word
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
+			pBI = (BiwordIndex) in.readObject();
+			in.close();
+
+			// Read k-gram
+			in = new ObjectInputStream(new FileInputStream(dir + "/kgram.bin"));
+			pKGI = (KGramIndex) in.readObject();
+			in.close();
+		} catch (IOException e) {
+//			e.printStackTrace();
+			System.out.println("Failed Processing Serialized files");
+		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+			System.out.println("Failed Processing Serialized files");
+		}
 	}
 
 	public static void indexDirectory(Scanner reader){
