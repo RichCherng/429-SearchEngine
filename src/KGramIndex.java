@@ -1,8 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-public class KGramIndex {
+@SuppressWarnings("serial")
+public class KGramIndex implements Serializable {
 
 	private HashMap<String, ArrayList<String>> oneGram;
 	private HashMap<String, ArrayList<String>> twoGram;
@@ -47,20 +48,22 @@ public class KGramIndex {
 	}
 
 
-	public void test(){
-		for(Map.Entry<String, ArrayList<String>> entry: twoGram.entrySet()){
-			System.out.println(entry.getKey());
-			for(String s : entry.getValue()){
-				System.out.println("\t" + s);
-			}
-		}
-		for(Map.Entry<String, ArrayList<String>> entry: threeGram.entrySet()){
-			System.out.println(entry.getKey());
-			for(String s : entry.getValue()){
-				System.out.println("\t" + s);
-			}
-		}
-	}
+//	public void test(){
+//		for(Map.Entry<String, ArrayList<String>> entry: twoGram.entrySet()){
+//			System.out.println(entry.getKey());
+//			for(String s : entry.getValue()){
+//				System.out.println("\t" + s);
+//			}
+//		}
+//		for(Map.Entry<String, ArrayList<String>> entry: threeGram.entrySet()){
+//			System.out.println(entry.getKey());
+//			for(String s : entry.getValue()){
+//				System.out.println("\t" + s);
+//			}
+//		}
+//	}
+
+
 	private void addToHashMap(HashMap<String, ArrayList<String>> hm, String gram, String type){
 		if(hm.containsKey(gram)){
 			// Contain in the map
