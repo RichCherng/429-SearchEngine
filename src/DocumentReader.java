@@ -109,6 +109,8 @@ public class DocumentReader {
 		return mArticles.size();
 	}
 	
+	
+	
 	/** Weight Ranking Methods (Ld) starts **/
 	
 	/**
@@ -131,7 +133,7 @@ public class DocumentReader {
 	 * @param pDocID
 	 * @return The Ld of the pDocID
 	 */
-	public double getWeightOfDocument(int pDocID) {
+	 double getWeightOfDocument(int pDocID) {
 		double sumOfWeightOfAllTerm 		= 0;
 		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); 			// Get all the HM of term --> termFreq
 		
@@ -145,6 +147,11 @@ public class DocumentReader {
 		
 		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
 		return Ld;
+	}
+	
+	public int getTermFreqOfDoc(String pTerm, int pDocID) {
+		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
+		return termFreqHM.get(pTerm);
 	}
 
 	/**
