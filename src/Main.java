@@ -55,6 +55,11 @@ public class Main {
 				}
 				System.out.println("Loading index completed");
 
+
+				RankRetrievalsObject mRRO = new RankRetrievalsObject(aDII);
+//				System.out.println(aDII.getDocListPosting("dog"));
+//				System.out.println(aDII.getDocListPosting("cat"));
+				mRRO.processQuery("dog cat");
 				// Start parsing queries
 				QueryParser querie =  new QueryParser(aDII, aBI, aSC);
 				querie.richRun();

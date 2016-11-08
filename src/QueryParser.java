@@ -20,7 +20,7 @@ public class QueryParser {
 		mDII		= pDII;
 		mSC			= pSC;
 		mScanner 	= new Scanner(System.in);
-		mRRO 		= new RankRetrievalsObject();
+		mRRO 		= new RankRetrievalsObject(pDII);
 		mBR			= new BooleanRetrieval(mDII, mBI);
 		mMode 		= selectMode(mScanner);
 
@@ -55,6 +55,9 @@ public class QueryParser {
 					case 1:
 						// Boolean Retrieval
 						mBR.processQuery(inputLine);
+						break;
+					case 2:
+						mRRO.processQuery(inputLine);
 						break;
 				}
 
