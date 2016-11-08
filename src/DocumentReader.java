@@ -121,6 +121,7 @@ public class DocumentReader {
 
 		for (Map.Entry<Integer, HashMap<String, Integer>> eachEntry : docIdToTermToTermFreq.entrySet()) {
 			listOfLd[index] = getWeightOfDocument(eachEntry.getKey());
+			System.out.printf("Index: %d, Ld: %f\n", index, getWeightOfDocument(eachEntry.getKey()));
 			index++;
 		}
 		return listOfLd;
@@ -138,20 +139,26 @@ public class DocumentReader {
 
 		for (Map.Entry<String, Integer> eachEntry : termFreqHM.entrySet()) { 				// For each term in the document
 
-			int termFreqOfTermInDoc 		= eachEntry.getValue(); 						// Get the termFreq
+			int termFreqOfTermInDoc 		= eachEntry.getValue(); 						// Get the termFreq tf(t,d)
+//			System.out.printf("tf(%s,%d): %d\n", eachEntry.getKey(), pDocID, termFreqOfTermInDoc);
 			double weightOfDocOfTerm 		= 1.0 + Math.log(termFreqOfTermInDoc); 			// Get the W(d,t) = 1 + ln( tf(t,d) )
-			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);				// Get the (W(d,t)^2
+//			System.out.printf("W(%d, %s): %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTerm);
+			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);				// Get the W(d,t)^2
+//			System.out.printf("W(%d, %s)^2: %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTermSquare);
 			sumOfWeightOfAllTerm 		   += weightOfDocOfTermSquare;
+//			System.out.printf("Sum of all weight: %f\n", sumOfWeightOfAllTerm);
 		}
-
+		
 		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
+//		System.out.printf("L(%d): %f\n", pDocID, Ld);
 		return Ld;
 	}
 
-	public int getTermFreqOfDoc(String pTerm, int pDocID) {
-		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
-		return termFreqHM.get(pTerm);
-	}
+//	public int getTermFreqOfDoc(String pTerm, int pDocID) {
+//		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
+//		System.out.printf("term: %s, termFreq: %d", pTerm, termFreqHM.get(pTerm));
+//		return termFreqHM.get(pTerm);
+//	}
 
 	/**
 	 * Add Term Frequency in the HashMap to the given pDocID
