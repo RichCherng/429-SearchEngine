@@ -76,4 +76,59 @@ public class DirectoryParser {
 		System.out.println("Parse and index documents completed");
 		return true;
 	}
+
+	public static void viewDocument(String pDir, String pFileName){
+//		ContentReader reader = new ContentReader(pDir);
+		Path directory = Paths.get(pDir).toAbsolutePath();
+
+		if(!Files.exists(directory)){
+			System.out.println("Directory doesn't exists");
+		}
+
+		try{
+//			System.out.println(directory.toString());
+
+			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
+//				int docNum = 0;
+	            public FileVisitResult preVisitDirectory(Path dir,
+	             BasicFileAttributes attrs) {
+	               // make sure we only process the current working directory
+	               if (directory.equals(dir)) {
+	                  return FileVisitResult.CONTINUE;
+	               }
+	               return FileVisitResult.SKIP_SUBTREE;
+	            }
+
+	            public FileVisitResult visitFile(Path file,
+	             BasicFileAttributes attrs) {
+	               // only process .txt files
+	               if (file.toString().endsWith(".json")) {
+//	            	   docNum++;
+//	            	   if(docNum % 500 == 0){
+//	            		   System.out.println(docNum);
+//	            	   }
+//	            	   System.out.println(file.toString());
+	            	   if(file.toString().equals(Paths.get(pDir).toAbsolutePath()+"\\"+pFileName)){
+	            		    JSONSIFY mJSONParser = new JSONSIFY(file.toString());
+	           				Article aArticle 	= mJSONParser.read();
+//	           				System.out.println(file.toString());
+	           				System.out.println(aArticle.body);
+	            	   }
+	               }
+	               return FileVisitResult.CONTINUE;
+	            }
+
+	            // don't throw exceptions if files are locked/other errors occur
+	            public FileVisitResult visitFileFailed(Path file,
+	             IOException e) {
+
+	               return FileVisitResult.CONTINUE;
+	            }
+	         });
+		} catch (Exception ex){
+			System.out.println("Error viwing content");
+		}
+
+	}
+
 }
