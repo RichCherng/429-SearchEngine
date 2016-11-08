@@ -25,10 +25,10 @@ public class PorterStemmer {
    private static final Pattern p = Pattern.compile(V);
 
    // *d:  stem ends with a double consonant
-   private static final Pattern d = Pattern.compile(c + c + "$");
+   private static final Pattern d = Pattern.compile(c + c + "\\1$");
 
    // *o: the stem ends cvc, where the second c is not W, X, or Y (e.g. -WIL, -HOP).
-   private static final Pattern o = Pattern.compile(C + v + "[^aeiouwxy]"); // ? $
+   private static final Pattern o = Pattern.compile(C + v + "[^aeiouwxy]$"); // ? $
 
    // Two or more (VC)
    private static final Pattern two = Pattern.compile("^(" + C + ")?" + "("+ V + C + "){2}" );
@@ -171,9 +171,12 @@ public class PorterStemmer {
           || token.endsWith("iz")) {
 
             token = token + "e";
-         } else if ( d.matcher(token).find() && !(token.endsWith("l") || token.endsWith("s") || token.endsWith("z")) ){
+         } else if ( d.matcher(token).find()
+        		 && !(token.endsWith("l") || token.endsWith("s")|| token.endsWith("z")) ){
         	 token = token.substring(0, token.length() - 1);
-         } else if ((!two.matcher(token).find() && mGr0.matcher(token).find()) && o.matcher(token).find()){ // (m < 2 && m > 0) = m = 1
+         } else if ((!two.matcher(token).find()
+        		 && mGr0.matcher(token).find())
+        		 && o.matcher(token).find()){ // (m < 2 && m > 0) = m = 1
         	 token += "e";
          }
          // use the regex patterns you wrote for 1b*.4 and 1b*.5

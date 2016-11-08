@@ -114,11 +114,15 @@ public class QueryParser {
 				int max = -1;
 				String maxTerm = "";
 				for(String s: sugList){
-					int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(s)).length;
-					if(docFreq > max){
-						max = docFreq;
-						maxTerm = s;
+//					System.out.println(mDII.getDocListPosting(PorterStemmer.processToken(s)));
+					if(mDII.getDocListPosting(PorterStemmer.processToken(s)) != null){
+						int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(s)).length;
+						if(docFreq > max){
+							max = docFreq;
+							maxTerm = s;
+						}
 					}
+
 				}
 				if(maxTerm.length() > 0){
 					orgQuery[i] = orgQuery[i].replaceAll(word, maxTerm);
