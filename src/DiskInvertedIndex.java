@@ -15,7 +15,7 @@ import java.util.List;
 
 public class DiskInvertedIndex {
 
-	private String mPath;
+//	private String mPath;
 	private RandomAccessFile mVocabList;
 	private RandomAccessFile mPostings;
 	private RandomAccessFile mDocWeights;
@@ -25,7 +25,7 @@ public class DiskInvertedIndex {
 
 	public DiskInvertedIndex(String path){
 		try{
-			mPath = path;
+//			mPath = path;
 			mVocabList 	= new RandomAccessFile(new File(path, "vocab.bin"), "r");
 			mPostings 	= new RandomAccessFile(new File(path, "postings.bin"), "r");
 			mDocWeights	= new RandomAccessFile(new File(path, "docWeights.bin"), "r");
@@ -57,7 +57,7 @@ public class DiskInvertedIndex {
 		return -1;
 	}
 
-	public Posting[] getPostings(String term){
+	public Posting[] getPositionPostings(String term){
 		long postingsPosition = binarySearchVocabulary(term);
 		if (postingsPosition >= 0){
 			return readPostingsFromFile(mPostings, postingsPosition);
@@ -72,7 +72,7 @@ public class DiskInvertedIndex {
 	 * @return Array of Pair object, <document ID, termFrequency>
 	 */
 	@SuppressWarnings("unchecked")
-	public Pair<Integer>[] getDocList(String term){
+	public Pair<Integer>[] getDocListPosting(String term){
 
 		long postingsPosition = binarySearchVocabulary(term);
 		if (postingsPosition >= 0){
@@ -240,6 +240,31 @@ public class DiskInvertedIndex {
 			System.out.println(ex);
 		}
 		return null;
+	}
+
+	public void printVocab(){
+		int count = 0;
+		try{
+			mVocabList.seek(0);
+			for(int i = 0; i < mVocabTable.length; i += 2){
+
+				long vListPosition = mVocabTable[i];
+	            int termLength;
+	            if(i+2 == mVocabTable.length){
+	            	termLength = (int) (mVocabList.length() - vListPosition);
+	            }else {
+	            	termLength = (int) (mVocabTable[(i + 2)] - vListPosition);
+	            }
+
+				byte[] buffer = new byte[termLength];
+				mVocabList.read(buffer, 0, termLength);
+				System.out.println(new String(buffer, "ASCII"));
+				count++;
+			}
+		}catch(IOException e){
+
+		}
+		System.out.println("Total Number of vocabs: " + count);
 	}
 
 	public List<String> getFileName(){
