@@ -42,6 +42,8 @@ public class RankRetrievalsObject {
 	 * @param pQuery - The input query
 	 */
 	public void processQuery(String pQuery) {
+		topDocOnScorePQ.clear();
+		accumulatorHM = new HashMap<Integer, Float>();
 		String[] queriesArr = pQuery.split("\\s+");
 		for (String eachTerm : queriesArr) {
 			String stemEachTerm = PorterStemmer.processToken(eachTerm);
@@ -88,11 +90,11 @@ public class RankRetrievalsObject {
 			int docID				= 	eachEntry.getKey();
 			// A(d)
 			float accumulator 		= 	eachEntry.getValue();
-			// System.out.printf("A(%d): %f\n", docID, accumulator);
+//			 System.out.printf("A(%d): %f\n", docID, accumulator);
 			if (accumulator != 0.0f) {
 				// L(d)
 				double weightOfDoc 	= 	mDII.getDocWeight(eachEntry.getKey());
-				// System.out.printf("L(%d): %f\n", docID, weightOfDoc);
+//				 System.out.printf("L(%d): %f\n", docID, weightOfDoc);
 				// A(d) / L(d)
 				float result 		=	(float) (accumulator / weightOfDoc);
 				// System.out.printf("result: %f\n", result);
