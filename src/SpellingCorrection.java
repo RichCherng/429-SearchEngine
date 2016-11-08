@@ -15,12 +15,22 @@ public class SpellingCorrection {
 		threeGram 	= pKGram.getNGram(3);
 	}
 
-	public String correct(String pWord){
+	/**
+	 * Retrieve all the possible words that in common with pWord in k-gram.
+ 	 * Calculate Jaccard Coefficient for each possible words, select those that
+ 	 * have JC over (0.1) and calculate edit-distance. Select words with the lowest edit-distance
+	 * @param pWord correcting word
+	 * @return List of all possible words as ArrayList<String>
+	 */
+	public String[] correct(String pWord){
 		// All vocab types that have k-gram in common with the misspelled term.
 		HashSet<String> commons = getCommonList(pWord);
 
 		// Calculate the Jaccard coefficient for each type in the selection
 		HashMap<String, HashSet<String>> wKGram = getKGram(pWord);
+
+		ArrayList<String> correctionList = new ArrayList<String>();
+		int minED = 0;
 		for(String c : commons){
 
 			// # of time c appear in word's kgram
@@ -31,21 +41,33 @@ public class SpellingCorrection {
 				}
 			}
 			HashMap<String, HashSet<String>> commonKGram = getKGram(c);
-			int cSize = commonKGram.size();
 			if(hit > 0){
-
+				// Calculate Jaccard Coefficient
 				double jc = hit/((double)commonKGram.size() + (double)wKGram.size() - (double)hit);
+
+				// select those that are about jc threshold
 				if( jc >= 0.1){
 					System.out.print(c+" : ");
 					System.out.println(jc);
+					int ED = calcEditDistance(pWord,c);
 
-					int editDistance = calcEditDistance(pWord,c);
-					System.out.println(editDistance);
+					if(correctionList.size() == 0){
+						correctionList.add(c);
+						minED = ED;
+					} else {
+						if(minED > ED){
+							minED = ED;
+							correctionList.clear();
+							correctionList.add(c);
+						} else if(minED == ED){
+							correctionList.add(c);
+						}
+					}
+					System.out.println(ED);
 				}
 			}
 		}
-
-		return null;
+		return (String[]) correctionList.toArray();
 	}
 
 	private int calcEditDistance(String source, String target){
