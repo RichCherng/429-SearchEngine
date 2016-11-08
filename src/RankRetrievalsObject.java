@@ -46,6 +46,9 @@ public class RankRetrievalsObject {
 		for (String eachTerm : queriesArr) {
 			// W(q,t), Importance of the term in the query, W(q,t) = ln( 1 + (N/df(t) )
 			float weightOfTermInQuery 	= getWeightOfTermInQuery(eachTerm);
+			if (weightOfTermInQuery < 0.0f) {
+				continue;
+			}
 //			System.out.printf("W(q,%s): " + weightOfTermInQuery + "\n", eachTerm);
 			Pair<Integer>[]	postings 	= mDII.getDocListPosting(eachTerm);
 //			// Get the Postings list of the term
@@ -96,32 +99,24 @@ public class RankRetrievalsObject {
 			}
 		}
 
-
-		// Print the top ten document
-		int rank = 1;
-		while(!topDocOnScorePQ.isEmpty()) {
-			if (rank > 10) {
-				break;
-			}
-			else {
-				DocAndScorePair anObj = topDocOnScorePQ.poll();
-				System.out.println(rank + ". Document" + anObj.mDocID + " with weight: " + anObj.mScore);
-				rank++;
-			}
-		}
-	}
-
-	/**
-	 * Update the accumulator HashMap that contains documentID and its score
-	 * @param pDocID
-	 * @param pValue
-	 */
-	private void addAccumulator(int pDocID, float pValue) {
-		if (accumulatorHM.containsKey(pDocID)) {
-			accumulatorHM.put(pDocID, accumulatorHM.get(pDocID) + pValue);
+		
+		if (topDocOnScorePQ.size() == 0) {
+			// If there is no result for rank retrieval
+			System.out.println("No document found");
 		}
 		else {
-			accumulatorHM.put(pDocID, pValue);
+			// Print the top ten document
+			int rank = 1;
+			while(!topDocOnScorePQ.isEmpty()) {
+				if (rank > 10) {
+					break;
+				}
+				else {
+					DocAndScorePair anObj = topDocOnScorePQ.poll();
+					System.out.println(rank + ". Document" + anObj.mDocID + " with weight: " + anObj.mScore);
+					rank++;
+				}
+			}
 		}
 	}
 
@@ -134,12 +129,32 @@ public class RankRetrievalsObject {
 	private float getWeightOfTermInQuery(String pTerm) {
 		// The the document frequency - counting the size of the posting of the term
 		// df(t) - Document frequency of the term (how many documents contain the term)
-		int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(pTerm)).length;
-		// N - the total number of documents in collection
-		int N 		= mDII.getFileName().size();
-		// ln( 1 + (N / df(t)) )
-		float weightOfTermInQuery = (float) Math.log(1 + ((float)N / (float)docFreq));
-		return weightOfTermInQuery;
+		// If the term does not exist in the query
+		if (mDII.getDocListPosting(PorterStemmer.processToken(pTerm)) == null) {
+			return -0.1f;
+		}
+		else {
+			int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(pTerm)).length;
+			// N - the total number of documents in collection
+			int N 		= mDII.getFileName().size();
+			// ln( 1 + (N / df(t)) )
+			float weightOfTermInQuery = (float) Math.log(1 + ((float)N / (float)docFreq));
+			return weightOfTermInQuery;
+		}
+	}
+	
+	/**
+	 * Update the accumulator HashMap that contains documentID and its score
+	 * @param pDocID
+	 * @param pValue
+	 */
+	private void addAccumulator(int pDocID, float pValue) {
+		if (accumulatorHM.containsKey(pDocID)) {
+			accumulatorHM.put(pDocID, accumulatorHM.get(pDocID) + pValue);
+		}
+		else {
+			accumulatorHM.put(pDocID, pValue);
+		}
 	}
 
 	/**
