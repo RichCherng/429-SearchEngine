@@ -92,6 +92,7 @@ public class DiskInvertedIndex {
 		long postingsPosition = binarySearchVocabulary(term);
 		return postingsPosition > -1;
 	}
+	
 	private static Posting[] readPostingsFromFile(RandomAccessFile postings, long postingsPosition){
 		try{
 			// seek to the position in the file where the postings start.
