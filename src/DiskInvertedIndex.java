@@ -88,6 +88,10 @@ public class DiskInvertedIndex {
 		return null;
 	}
 
+	public boolean hasTerm(String term){
+		long postingsPosition = binarySearchVocabulary(term);
+		return postingsPosition > -1;
+	}
 	private static Posting[] readPostingsFromFile(RandomAccessFile postings, long postingsPosition){
 		try{
 			// seek to the position in the file where the postings start.
@@ -132,6 +136,8 @@ public class DiskInvertedIndex {
 		}
 		return null;
 	}
+
+
 
    private long binarySearchVocabulary(String term) {
 	      // do a binary search over the vocabulary, using the vocabTable and the file vocabList.
@@ -241,6 +247,7 @@ public class DiskInvertedIndex {
 		}
 		return null;
 	}
+
 
 	public void printVocab(){
 		int count = 0;
