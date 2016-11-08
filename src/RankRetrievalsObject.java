@@ -19,7 +19,8 @@ public class RankRetrievalsObject {
 		}
 	}
 
-	public RankRetrievalsObject() {
+	public RankRetrievalsObject(DiskInvertedIndex pDII) {
+		mDII			= pDII;
 		accumulatorHM	= new HashMap<Integer, Float>();					// Map docID ---> A(docID), The accumulator score for each doc for term in query
 		PQsort pqs 		= new PQsort();										// The Comparator for the priority queue
 		topDocOnScorePQ 	 	= new PriorityQueue<DocAndScorePair>(pqs);	// Construct a priority queue to rank the document by the score L(d)
@@ -38,7 +39,7 @@ public class RankRetrievalsObject {
 	 * @param pQuery - The input query
 	 */
 	public void processQuery(String pQuery) {
-		String[] queriesArr = pQuery.split("\\+");
+		String[] queriesArr = pQuery.split("\\s+");
 		for (String eachTerm : queriesArr) {
 			// W(q,t), Importance of the term in the query, W(q,t) = ln( 1 + (N/df(t) )
 			float weightOfTermInQuery 	= getWeightOfTermInQuery(eachTerm);
@@ -77,6 +78,7 @@ public class RankRetrievalsObject {
 				accumulatorHM.put(eachEntry.getKey(), result);
 			}
 		}
+
 
 		// Print the top ten document
 		int rank = 1;
