@@ -15,7 +15,7 @@ public class DocumentReader {
 	private final int 		MIN_LENGTH = 3;
 	/** For the weight of document **/
 	LinkedHashMap<Integer, HashMap<String,Integer>> docIdToTermToTermFreq; // docID --> (term --> termFreq)
-	
+
 	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI, KGramIndex pKGI){
 		mArticles 				= new ArrayList<Article>();
 		aPII 					= pPII;
@@ -108,11 +108,9 @@ public class DocumentReader {
 	public int size(){
 		return mArticles.size();
 	}
-	
-	
-	
+
 	/** Weight Ranking Methods (Ld) starts **/
-	
+
 	/**
 	 * Get array of Ld all of documents
 	 * @return
@@ -133,10 +131,11 @@ public class DocumentReader {
 	 * @param pDocID
 	 * @return The Ld of the pDocID
 	 */
-	 double getWeightOfDocument(int pDocID) {
+	private double getWeightOfDocument(int pDocID) {
+
 		double sumOfWeightOfAllTerm 		= 0;
 		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); 			// Get all the HM of term --> termFreq
-		
+
 		for (Map.Entry<String, Integer> eachEntry : termFreqHM.entrySet()) { 				// For each term in the document
 
 			int termFreqOfTermInDoc 		= eachEntry.getValue(); 						// Get the termFreq
@@ -144,11 +143,11 @@ public class DocumentReader {
 			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);				// Get the (W(d,t)^2
 			sumOfWeightOfAllTerm 		   += weightOfDocOfTermSquare;
 		}
-		
+
 		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
 		return Ld;
 	}
-	
+
 	public int getTermFreqOfDoc(String pTerm, int pDocID) {
 		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
 		return termFreqHM.get(pTerm);
@@ -175,7 +174,7 @@ public class DocumentReader {
 			docIdToTermToTermFreq.put(pDocID, termToFreq);
 		}
 	}
-	
+
 	/** Weight Ranking Method (Ld) ends **/
 
 
