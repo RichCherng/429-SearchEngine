@@ -17,71 +17,73 @@ public class KGramIndex implements Serializable {
 	}
 
 	public void addType(String type){
+
 		char[] cArr = type.toCharArray();
 		for(int i = 0 ; i < cArr.length; i++){
 			addToHashMap(oneGram, cArr[i]+"", type); // Add to one-gram
+			String twoKey 	= null;
+			String threeKey = null;
+
+			// Two - Gram
 			if(i == 0){
 				/** Starting **/
 
-				// Add to Two-gram
-				addToHashMap(twoGram, "$"+cArr[i], type);
-				// Add to Three-gram
-				if( i + 1 < cArr.length){
-					addToHashMap(threeGram, "$"+cArr[i] + cArr[i+1], type);
-				}
-
-			} else if( i == cArr.length - 1){
-				/** Ending for 2-gram **/
-				// Add to Two-Gram
-				addToHashMap(twoGram, "" + cArr[i]+"$", type);
-			} else if( i + 1 == cArr.length - 1){
-				/** Ending for 3-gram **/
-				// Add to Three-Gram
-				addToHashMap(threeGram, "" + cArr[i] + cArr[i+1] + "$", type);
-			}else {
-				/** Between **/
-				if( i + 2 < cArr.length){
-					// Add to Three-gram
-					addToHashMap(threeGram, "" + cArr[i] + cArr[i+1] + cArr[i+2], type);
-				}
-				if(i + 1 < cArr.length){
-					// Add to Two-gram
-					addToHashMap(twoGram, "" + cArr[i] + cArr[i+1], type);
-				}
-			}
-		}
-	}
-
-	public HashSet<String> getPossibleList(String pWord){
-		HashSet<String> posList = new HashSet<String>();
-
-		char[] cArr = pWord.toCharArray();
-		for(int i = 0; i < cArr.length; i++){
-
-			// Retrieve from one-gram
-			posList.addAll(oneGram.get(cArr[i]+""));
-
-			if(i == 0){
-				/** Starting **/
-
-				// Retrieve from Two-Gram
-				posList.addAll(twoGram.get("$"+cArr[i]));
-
-				// Retrieve from Three-Gram
-				if( i + 1 < cArr.length){
-					posList.addAll(threeGram.get("$"+cArr[i]+cArr[i+1]));
-				}
-
-			} else if (i == cArr.length - 1){
-				/** Ending **/
-
+				twoKey = "$" + cArr[i];
+				addToHashMap(twoGram, twoKey, type);
+				twoKey = null;
+				if(i + 1 < cArr.length) { twoKey = "" + cArr[i] + cArr[i+1]; }// type[0:2]
+			} else if(i == cArr.length - 1){
+				/** Ending for 2-gram**/
+				twoKey = "" + cArr[i]+"$";
 			} else {
 				/** Between **/
+				if(i + 1 < cArr.length){
+					// Add to Two-gram
+					twoKey = "" + cArr[i] + cArr[i+1];
+				}
+			}
 
+			// Three - Gram
+			if(i == 0){
+				/** Starting **/
+
+				if( i + 1 < cArr.length){
+					threeKey = "$"+cArr[i] + cArr[i+1];
+					addToHashMap(threeGram, threeKey, type);
+					threeKey = null;
+					if(i + 2 < cArr.length) { threeKey = "" + cArr[i] + cArr[i+1] + cArr[i+2]; } // type[0:3]
+				}
+			} else if( i + 1 == cArr.length - 1){
+				/** Ending for 3-gram **/
+				threeKey = "" + cArr[i] + cArr[i+1] + "$";
+			}else {
+				/** Between **/
+				if(i + 2 < cArr.length){
+					// Add to Three-gram
+					threeKey = "" + cArr[i] + cArr[i+1] + cArr[i+2];
+				}
+			}
+
+			if(twoKey != null){
+				addToHashMap(twoGram, twoKey, type);
+			}
+
+			if(threeKey != null){
+				addToHashMap(threeGram, threeKey, type);
 			}
 		}
 
+	}
 
+	public HashMap<String, HashSet<String>> getNGram(int k){
+		switch(k){
+			case 1:
+				return oneGram;
+			case 2:
+				return twoGram;
+			case 3:
+				return threeGram;
+		}
 		return null;
 	}
 

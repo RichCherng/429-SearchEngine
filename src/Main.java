@@ -58,7 +58,7 @@ public class Main {
 
 				/** Testing Spelling Correction **/
 				SpellingCorrection aSC = new SpellingCorrection(aKGI);
-//				System.out.println(aSC.correct("parg"));
+				System.out.println(aSC.correct("parker"));
 				break;
 		}
 
@@ -111,7 +111,7 @@ public class Main {
 
 
 	public static void indexDirectory(Scanner reader){
-		System.out.println("Enter the name of a directory to idnex:");
+		System.out.println("Enter the name of a directory to index:");
 		String folder = reader.nextLine();
 
 		PositionalInvertedIndex aPII 			 = new PositionalInvertedIndex();
