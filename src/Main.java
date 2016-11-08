@@ -33,11 +33,13 @@ public class Main {
 
 				/** Read Serialized Objects **/
 				try {
+					System.out.println("Loading Bi-word index...");
 					// Read bi-word
 					ObjectInputStream in = new ObjectInputStream(new FileInputStream(dir+"/biword.bin"));
-					aBI = (BiwordIndex) in.readObject();
+//					aBI = (BiwordIndex) in.readObject();
 					in.close();
 
+					System.out.println("Loading K-gram index...");
 					// Read k-gram
 					in = new ObjectInputStream(new FileInputStream(dir + "/kgram.bin"));
 					aKGI = (KGramIndex) in.readObject();
@@ -49,6 +51,7 @@ public class Main {
 //					e.printStackTrace();
 					System.out.println("Failed Processing Serialized files");
 				}
+				System.out.println("Loading index completed");
 
 
 //				aKGI.print();
@@ -58,7 +61,7 @@ public class Main {
 
 				/** Testing Spelling Correction **/
 				SpellingCorrection aSC = new SpellingCorrection(aKGI);
-				System.out.println(aSC.correct("parker"));
+				System.out.println(aSC.correct("parg"));
 				break;
 		}
 
@@ -128,11 +131,13 @@ public class Main {
 		diskWriter.writeToDisk(folder,aPII);
 
 		try {
+			System.out.println("Saving bi-word index to disk...");
 			// Write Bi-Word
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(folder+"/biword.bin"));
 			out.writeObject(aBI);
 			out.close();
 
+			System.out.println("Saving k-gram index to disk...");
 			// Write K-Gram
 			out = new ObjectOutputStream(new FileOutputStream(folder+"/kgram.bin"));
 			out.writeObject(aKGI);
@@ -143,6 +148,7 @@ public class Main {
 			e.printStackTrace();
 		}
 
+		System.out.println("Saving indexs completed");
 
 
 	}

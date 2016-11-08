@@ -47,8 +47,8 @@ public class SpellingCorrection {
 
 				// select those that are about jc threshold
 				if( jc >= 0.1){
-					System.out.print(c+" : ");
-					System.out.println(jc);
+//					System.out.print(c+" : ");
+//					System.out.println(jc);
 					int ED = calcEditDistance(pWord,c);
 
 					if(correctionList.size() == 0){
@@ -63,11 +63,11 @@ public class SpellingCorrection {
 							correctionList.add(c);
 						}
 					}
-					System.out.println(ED);
+//					System.out.println(ED);
 				}
 			}
 		}
-		return (String[]) correctionList.toArray();
+		return correctionList.toArray(new String[correctionList.size()]);
 	}
 
 	private int calcEditDistance(String source, String target){
