@@ -12,19 +12,19 @@ public class RankRetrievalsObject {
 	public RankRetrievalsObject() {
 		accumulatorHM	= new HashMap<Integer, Float>();	// Map docID ---> A(docID), The accumulator score for each doc for term in query
 	}
-	
+
 	public void setQuery(String pQuery) {
 		mQuery = pQuery;
 	}
-	
+
 	public void setPII(PositionalInvertedIndex pPII) {
 		mPII = pPII;
 	}
-	
+
 	public void setDocReader(DocumentReader pDocReader) {
 		mDocReader = pDocReader;
 	}
-	
+
 	public void processQuery() {
 		String[] queriesArr = mQuery.split("\\+");
 		for (String eachTerm : queriesArr) {
@@ -44,10 +44,10 @@ public class RankRetrievalsObject {
 				float result			= 	(weightOfTermInDoc * weightOfTermInQuery);		// W(d,t) X W(q,t)
 				addAccumulator(eachPost.mDocID, result);									// A(d) += W(d,t) X W(q,t)
 			}
-			
+
 		}
 	}
-	
+
 	private void addAccumulator(int pDocID, float pValue) {
 		if (accumulatorHM.containsKey(pDocID)) {
 			accumulatorHM.put(pDocID, accumulatorHM.get(pDocID) + pValue);
@@ -56,7 +56,7 @@ public class RankRetrievalsObject {
 			accumulatorHM.put(pDocID, pValue);
 		}
 	}
-	
+
 	/**
 	 * Return the weight of the term in the query W(q,t)
 	 * Using the formula W(q,t) = ln(1 + (N / dt(t)) )

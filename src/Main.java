@@ -27,6 +27,7 @@ public class Main {
 				DiskInvertedIndex	aDII = null;
 				BiwordIndex 		aBI  = null;
 				KGramIndex			aKGI = null;
+				SpellingCorrection  aSC	 = null;
 				System.out.println("Enter the name of an index to read:");
 				String dir  = reader.nextLine();
 				aDII 		= new DiskInvertedIndex(dir);
@@ -43,6 +44,7 @@ public class Main {
 					// Read k-gram
 					in = new ObjectInputStream(new FileInputStream(dir + "/kgram.bin"));
 					aKGI = (KGramIndex) in.readObject();
+					aSC = new SpellingCorrection(aKGI); // Initialize Spelling Correction
 					in.close();
 				} catch (IOException e) {
 //					e.printStackTrace();
@@ -53,15 +55,10 @@ public class Main {
 				}
 				System.out.println("Loading index completed");
 
+				// Start parsing queries
+				QueryParser querie =  new QueryParser(aDII, aBI, aSC);
+				querie.richRun();
 
-//				aKGI.print();
-
-//				QueryParser querie =  new QueryParser(aDII, aBI);
-//				querie.leafRun();
-
-				/** Testing Spelling Correction **/
-				SpellingCorrection aSC = new SpellingCorrection(aKGI);
-				System.out.println(aSC.correct("parg"));
 				break;
 		}
 
