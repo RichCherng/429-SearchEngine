@@ -25,14 +25,40 @@ public class IndexWriter {
 	 * Saving index, generating three files: Posting Index, vocabulary list, and vocabulary table.
 	 * @param pPII
 	 */
-	public void writeToDisk(String pDirectory, PositionalInvertedIndex pPII){
+	public void writeToDisk(String pDirectory, PositionalInvertedIndex pPII, double[] pLds){
 
 		String[] dictionary 	= pPII.getSortedListOfVocab();
 		long[] vocabPositions 	= new long[dictionary.length];
 
 		buildVocabFile(pDirectory, dictionary, vocabPositions);
 		buildPostingFile(pDirectory, pPII, dictionary, vocabPositions);
+		buildDocWeightFile(pDirectory, pLds);
 		System.out.println("Saved Index to Disk");
+	}
+
+	private void buildDocWeightFile(String pDIr, double[] pLds){
+		FileOutputStream docWeightFileWriter = null;
+
+		try {
+			docWeightFileWriter = new FileOutputStream(new File(pDIr, "docWeights.bin"));
+			for(double d: pLds){
+				byte[] LDBytes = ByteBuffer.allocate(8).putDouble(d).array();
+				docWeightFileWriter.write(LDBytes, 0, LDBytes.length);
+			}
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			try{
+				docWeightFileWriter.close();
+ 			} catch (IOException ex){
+ 				System.out.println(ex.toString());
+ 			}
+ 		}
 	}
 
 
@@ -56,7 +82,7 @@ public class IndexWriter {
 				Posting[] postings = index.getListOfPosting(s);
 
 				// write the vocab table entry for this term: the byte location of the term in the vocab list file,
-				// and the byte lcoation of the posting for hte term in the posting file.
+				// and the byte lcoation of the posting for the term in the posting file.
 				byte[] vPositionBytes = ByteBuffer.allocate(8).putLong(vocabPositions[vocabI]).array();
 				vocabTableWriter.write(vPositionBytes, 0, vPositionBytes.length);
 
