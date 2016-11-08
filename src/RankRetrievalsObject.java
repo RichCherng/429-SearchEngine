@@ -8,7 +8,7 @@ public class RankRetrievalsObject {
 	DiskInvertedIndex mDII;
 	// Accumulator HashMap for storing the score of each document for the query
 	HashMap<Integer, Float> accumulatorHM;
-	
+
 	// PriorityQueue for keeping the documents with the highest score sorted
 	PriorityQueue<DocAndScorePair> topDocOnScorePQ;
 	// Class for the Priority Queue - Sort the Object by its score
@@ -18,13 +18,13 @@ public class RankRetrievalsObject {
 			return Float.compare(two.mScore, one.mScore);
 		}
 	}
-	
+
 	public RankRetrievalsObject() {
 		accumulatorHM	= new HashMap<Integer, Float>();					// Map docID ---> A(docID), The accumulator score for each doc for term in query
 		PQsort pqs 		= new PQsort();										// The Comparator for the priority queue
 		topDocOnScorePQ 	 	= new PriorityQueue<DocAndScorePair>(pqs);	// Construct a priority queue to rank the document by the score L(d)
 	}
-	
+
 	/**
 	 * Set the reference to the DiskInvertedIndex
 	 * @param pDII
@@ -32,7 +32,7 @@ public class RankRetrievalsObject {
 	public void setDiskInvertedIndex(DiskInvertedIndex pDII) {
 		mDII = pDII;
 	}
-	
+
 	/**
 	 * Rank the document based on the terms in the query and print the top 10 document according to the query
 	 * @param pQuery - The input query
@@ -40,8 +40,14 @@ public class RankRetrievalsObject {
 	public void processQuery(String pQuery) {
 		String[] queriesArr = pQuery.split("\\+");
 		for (String eachTerm : queriesArr) {
-			float weightOfTermInQuery 	= getWeightOfTermInQuery(eachTerm); 				// W(q,t), Importance of the term in the query, W(q,t) = ln( 1 + (N/df(t) )
-			Posting[] postingList 		= mDII.getPostings(eachTerm);						// Get the Postings list of the term
+			// W(q,t), Importance of the term in the query, W(q,t) = ln( 1 + (N/df(t) )
+			float weightOfTermInQuery 	= getWeightOfTermInQuery(eachTerm);
+			Pair<Integer>[]	postings 	= mDII.getDocListPosting(eachTerm);
+			// Get the Postings list of the term
+			Posting[] postingList 		= new Posting[postings.length];
+			for(int i = 0; i < postings.length; i++){
+				postingList[i] = new Posting(postings[i].getFirst());
+			}
 			// For each document in t's posting lists
 			for (Posting eachPost : postingList) {
 				// Get the size of position array (tells us the # of occurrence of term in the doc
@@ -56,10 +62,10 @@ public class RankRetrievalsObject {
 				float result			= 	(weightOfTermInDoc * weightOfTermInQuery);		// W(d,t) X W(q,t)
 				addAccumulator(eachPost.mDocID, result);									// A(d) += W(d,t) X W(q,t)
 			}
-			
+
 		}
-		
-		
+
+
 		// Now Diving A(d) by L(d) for each non-zero A(d)
 		for (Map.Entry<Integer, Float> eachEntry : accumulatorHM.entrySet()) {
 			int docID				= eachEntry.getKey();
@@ -71,7 +77,7 @@ public class RankRetrievalsObject {
 				accumulatorHM.put(eachEntry.getKey(), result);
 			}
 		}
-		
+
 		// Print the top ten document
 		int rank = 1;
 		while(!topDocOnScorePQ.isEmpty()) {
@@ -83,7 +89,7 @@ public class RankRetrievalsObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Update the accumulator HashMap that contains documentID and its score
 	 * @param pDocID
@@ -97,7 +103,7 @@ public class RankRetrievalsObject {
 			accumulatorHM.put(pDocID, pValue);
 		}
 	}
-	
+
 	/**
 	 * Return the weight of the term in the query W(q,t)
 	 * Using the formula W(q,t) = ln(1 + (N / dt(t)) )
@@ -106,12 +112,12 @@ public class RankRetrievalsObject {
 	 */
 	private float getWeightOfTermInQuery(String pTerm) {
 		// The the document frequency - counting the size of the posting of the term
-		int docFreq = mDII.getPostings(pTerm).length;						// df(t) - Document frequency of the term (how many documents contain the term)
+		int docFreq = mDII.getDocListPosting(pTerm).length;						// df(t) - Document frequency of the term (how many documents contain the term)
 		int N 		= mDII.getFileName().size();							// N - the total number of documents in collection
 		float weightOfTermInQuery = (float) Math.log(1 + (N / docFreq));	// ln( 1 + (N / df(t)) )
 		return weightOfTermInQuery;
 	}
-	
+
 	/**
 	 * Pair Class that maps the documentID with the score (A(d))
 	 * @author LeafChernchaosil
