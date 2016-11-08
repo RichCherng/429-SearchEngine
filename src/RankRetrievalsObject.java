@@ -87,7 +87,8 @@ public class RankRetrievalsObject {
 				break;
 			}
 			else {
-				System.out.print(rank + ". " + topDocOnScorePQ.poll().mDocID);
+				DocAndScorePair anObj = topDocOnScorePQ.poll();
+				System.out.print(rank + ". " + anObj.mDocID + "with weight: " + anObj.mScore);
 			}
 		}
 	}
