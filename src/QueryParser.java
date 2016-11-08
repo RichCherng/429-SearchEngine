@@ -10,8 +10,9 @@ public class QueryParser {
 	private SpellingCorrection 		mSC;
 	private BooleanRetrieval        mBR;
 	private int						mMode; // 1 - Boolean, 2 - rank
+	private String 					mPath;
 
-	public QueryParser(DiskInvertedIndex pDII, BiwordIndex pB, SpellingCorrection pSC){
+	public QueryParser(DiskInvertedIndex pDII, BiwordIndex pB, SpellingCorrection pSC, String pPath){
 		mBI			= pB;
 		mDII		= pDII;
 		mSC			= pSC;
@@ -19,6 +20,7 @@ public class QueryParser {
 		mRRO 		= new RankRetrievalsObject(pDII);
 		mBR			= new BooleanRetrieval(mDII, mBI);
 		mMode 		= selectMode(mScanner);
+		mPath		= pPath;
 
 
 	}
@@ -137,6 +139,7 @@ public class QueryParser {
 			int viewID = Integer.parseInt(input);
 			if(viewID < mDII.getFileName().size()){
 				mDII.getFileName().get(viewID);
+				DirectoryParser.viewDocument(mPath,mDII.getFileName().get(viewID));
 				System.out.println("Document Name: " + mDII.getFileName().get(viewID));
 			} else {
 				System.out.println("No document containing the query");

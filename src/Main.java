@@ -52,7 +52,7 @@ public class Main {
 					System.out.println("Failed Processing Serialized files");
 				}
 				System.out.println("Loading index completed");
-				QueryParser querie =  new QueryParser(aDII, aBI, aSC);
+				QueryParser querie =  new QueryParser(aDII, aBI, aSC, dir);
 				querie.richRun();
 
 				break;
