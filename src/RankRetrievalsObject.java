@@ -134,7 +134,7 @@ public class RankRetrievalsObject {
 	private float getWeightOfTermInQuery(String pTerm) {
 		// The the document frequency - counting the size of the posting of the term
 		// df(t) - Document frequency of the term (how many documents contain the term)
-		int docFreq = mDII.getDocListPosting(pTerm).length;
+		int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(pTerm)).length;
 		// N - the total number of documents in collection
 		int N 		= mDII.getFileName().size();
 		// ln( 1 + (N / df(t)) )

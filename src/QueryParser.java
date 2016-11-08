@@ -1,9 +1,4 @@
-import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class QueryParser {
 
@@ -51,6 +46,14 @@ public class QueryParser {
 				}
 			} else {
 				// Normal Query
+
+				// Check for spelling
+				/*
+				 * Any time a user runs a query using a term that is either missing from the
+				 * vocab or whose document freq is below some threshold value
+				 */
+				String suggestQuery = checkQuery(inputLine);
+
 				switch(mMode){
 					case 1:
 						// Boolean Retrieval
@@ -61,6 +64,25 @@ public class QueryParser {
 						break;
 				}
 
+				if(!suggestQuery.equals(inputLine)){
+					// there are modified query
+					System.out.println("Suggeted Query: " + suggestQuery);
+					System.out.println("Search again with suggested query? (y/n)");
+					inputLine = mScanner.nextLine();
+					if(inputLine.equals("y")){
+						inputLine = suggestQuery;
+						switch(mMode){
+							case 1:
+								// Boolean Retrieval
+								mBR.processQuery(inputLine);
+								break;
+							case 2:
+								mRRO.processQuery(inputLine);
+								break;
+						}
+					}
+
+				}
 				// View document
 				viewDocument();
 			}
@@ -69,8 +91,43 @@ public class QueryParser {
 		}
 	}
 
+	/**
+	 * Check if term missing from dictionary or document frequency is below soem threshold value
+	 * @return "" if no suggestion, other a bettwe query
+	 */
+	private String checkQuery(String pQuery){
+		String[] orgQuery = pQuery.split("\\s+");
+//		String modQuery = pQuery.replaceAll("[^a-zA-Z0-9- ]+", "").toLowerCase();// Normalize query
+
+		for(int i = 0; i < orgQuery.length; i++){
+			String word = orgQuery[i].replaceAll("[^a-zA-Z0-9-]+", "").toLowerCase();
+			String[] sugList = null;
+			String stem = PorterStemmer.processToken(word);
+			if(mDII.hasTerm(stem)){
+				// word in vocab
+			} else {
+				sugList = mSC.correct(word);
+				//Select the word with the highest document frequency
+				int max = -1;
+				String maxTerm = "";
+				for(String s: sugList){
+					int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(s)).length;
+					if(docFreq > max){
+						max = docFreq;
+						maxTerm = s;
+					}
+				}
+				if(maxTerm.length() > 0){
+					orgQuery[i] = orgQuery[i].replaceAll(word, maxTerm);
+				}
+			}
+		}
+
+		return String.join(" ", orgQuery);
+	}
+
 	private void viewDocument(){
-		System.out.println("Insert document ID to view document or press enter to skip: ");
+		System.out.println("Insert document ID to view document's name or press enter to skip: ");
 		String input = mScanner.nextLine();
 		if(input.length() > 0){
 			// Not empty = not skip

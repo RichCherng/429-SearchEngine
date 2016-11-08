@@ -26,7 +26,7 @@ public class IndexWriter {
 	 * @param pPII
 	 */
 	public void writeToDisk(String pDirectory, PositionalInvertedIndex pPII, double[] pLds){
-
+		System.out.println("Wrting index to disk...");
 		String[] dictionary 	= pPII.getSortedListOfVocab();
 		long[] vocabPositions 	= new long[dictionary.length];
 
