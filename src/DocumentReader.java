@@ -132,6 +132,7 @@ public class DocumentReader {
 	 * @return The Ld of the pDocID
 	 */
 	private double getWeightOfDocument(int pDocID) {
+
 		double sumOfWeightOfAllTerm 		= 0;
 		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); 			// Get all the HM of term --> termFreq
 
@@ -145,6 +146,11 @@ public class DocumentReader {
 
 		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
 		return Ld;
+	}
+
+	public int getTermFreqOfDoc(String pTerm, int pDocID) {
+		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
+		return termFreqHM.get(pTerm);
 	}
 
 	/**

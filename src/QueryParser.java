@@ -12,6 +12,7 @@ public class QueryParser {
 	private DirectoryParser mDir;
 	private BiwordIndex mBI;
 	private Scanner mScanner;
+	private RankRetrievalsObject mRRO;
 
 	public QueryParser(DocumentReader reader, PositionalInvertedIndex p, BiwordIndex pB, DirectoryParser pDir){
 		mDocReader 	= reader;
@@ -19,6 +20,7 @@ public class QueryParser {
 		mBI			= pB;
 		mDir 		= pDir;
 		mScanner = new Scanner(System.in);
+		mRRO 		= new RankRetrievalsObject();
 	}
 	// run
 	public void leafRun() {
@@ -30,6 +32,9 @@ public class QueryParser {
 				System.out.print("Enter queries: ");
 				continue;
 			}
+			mRRO.setQuery(inputLine);
+			mRRO.setPII(mPII);
+			mRRO.setDocReader(mDocReader);
 			// Special queries, don't have to worry about error checking
 			if (inputLine.charAt(0) == ':') {
 				// If the query is ":q", then exit the program

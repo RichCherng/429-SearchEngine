@@ -14,6 +14,10 @@ public class Posting {
 	public void addPosition(int pPosition){
 		mPositionArr.add(pPosition);
 	}
+	
+	public int getSizeOfPositionArray() {
+		return mPositionArr.size();
+	}
 
 	// Print <1, [0,1,2,3]>
 	@Override
