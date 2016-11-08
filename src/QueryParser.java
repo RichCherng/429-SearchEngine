@@ -115,13 +115,11 @@ public class QueryParser {
 				String maxTerm = "";
 				for(String s: sugList){
 //					System.out.println(mDII.getDocListPosting(PorterStemmer.processToken(s)));
-					if(mDII.getDocListPosting(PorterStemmer.processToken(s)) != null){
-						int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(s)).length;
-						if(docFreq > max){
-							max = docFreq;
-							maxTerm = s;
-						}
-					}
+					int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(s)).length;
+ 					if(docFreq > max){
+ 						max = docFreq;
+ 						maxTerm = s;
+ 					}
 
 				}
 				if(maxTerm.length() > 0){

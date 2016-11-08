@@ -25,10 +25,10 @@ public class PorterStemmer {
    private static final Pattern p = Pattern.compile(V);
 
    // *d:  stem ends with a double consonant
-   private static final Pattern d = Pattern.compile(c + c + "\\1$");
+   private static final Pattern d = Pattern.compile(c + c + "$");
 
    // *o: the stem ends cvc, where the second c is not W, X, or Y (e.g. -WIL, -HOP).
-   private static final Pattern o = Pattern.compile(C + v + "[^aeiouwxy]$"); // ? $
+   private static final Pattern o = Pattern.compile(C + v + "[^aeiouwxy]"); // ? $
 
    // Two or more (VC)
    private static final Pattern two = Pattern.compile("^(" + C + ")?" + "("+ V + C + "){2}" );
