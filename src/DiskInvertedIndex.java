@@ -18,6 +18,7 @@ public class DiskInvertedIndex {
 	private String mPath;
 	private RandomAccessFile mVocabList;
 	private RandomAccessFile mPostings;
+	private RandomAccessFile mDocWeights;
 	private long[] mVocabTable;
 	private List<String> mFileNames;
 
@@ -27,12 +28,33 @@ public class DiskInvertedIndex {
 			mPath = path;
 			mVocabList 	= new RandomAccessFile(new File(path, "vocab.bin"), "r");
 			mPostings 	= new RandomAccessFile(new File(path, "postings.bin"), "r");
+			mDocWeights	= new RandomAccessFile(new File(path, "docWeights.bin"), "r");
 			mVocabTable 			= readVocabTable(path);
 			mFileNames 				= readFileNames(path);
 
 		} catch (FileNotFoundException ex){
 			System.out.println(ex.toString());
 		}
+	}
+
+	public double getDocWeight(int pDocID){
+		Long position = (long)8 * (long)pDocID;
+		return readDocWeight(mDocWeights, position);
+	}
+
+	private double readDocWeight(RandomAccessFile pDocWeight, long position ){
+		try {
+			if(position < pDocWeight.length()){
+				pDocWeight.seek(position);
+				byte[] buffer = new byte[8];
+				pDocWeight.read(buffer, 0, buffer.length);
+				return ByteBuffer.wrap(buffer).getDouble();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	public Posting[] getPostings(String term){

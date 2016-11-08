@@ -128,7 +128,7 @@ public class Main {
 
 		/*** Write To Disk ****/
 		IndexWriter diskWriter = new IndexWriter();
-		diskWriter.writeToDisk(folder,aPII);
+		diskWriter.writeToDisk(folder, aPII, docReader.getListOfLd());
 
 		try {
 			System.out.println("Saving bi-word index to disk...");
