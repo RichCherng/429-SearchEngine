@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class QueryParser {
@@ -100,7 +101,7 @@ public class QueryParser {
 //		String modQuery = pQuery.replaceAll("[^a-zA-Z0-9- ]+", "").toLowerCase();// Normalize query
 
 		for(int i = 0; i < orgQuery.length; i++){
-			String word = orgQuery[i].replaceAll("[^a-zA-Z0-9-]+", "").toLowerCase();
+			String word = orgQuery[i].replaceAll("[^a-zA-Z0-9]+", "").toLowerCase();
 			String[] sugList = null;
 			String stem = PorterStemmer.processToken(word);
 			if(mDII.hasTerm(stem)){
@@ -122,7 +123,9 @@ public class QueryParser {
 				}
 			}
 		}
-
+//		for(String s: orgQuery){
+//			System.out.println(s);
+//		}
 		return String.join(" ", orgQuery);
 	}
 

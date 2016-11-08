@@ -74,6 +74,9 @@ public class Main {
 		// Store each articles in the ArrayList of Document.Article
 		aDirectoryParser.parseDirectory(folder);
 
+		// Clearing 1-gram and 2-gram for speed. (Not currently being use)
+		aKGI.clearGram(1);
+		aKGI.clearGram(2);
 
 		/*** Write To Disk ****/
 		IndexWriter diskWriter = new IndexWriter();

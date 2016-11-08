@@ -112,7 +112,8 @@ public class BooleanRetrieval {
 		for (String eachWord : wordList) {
 			// Ex: "Jamba Juice"
 			// Ex: "Jamba The Juice"
-			if (eachWord.charAt(0) == '\"') {
+//			if (eachWord.charAt(0) == '\"') {
+			if(eachWord.contains(" ")){
 
 				// Do the phrase Query
 				listOfPostingArr.add(phraseMergeListOfPostingList(phrasePosting(eachWord), wordList.size()));
@@ -155,7 +156,7 @@ public class BooleanRetrieval {
 			}
 		}
 		if (notQueryList.size() > 0) {
-			Posting[] finalNotPosting = mergeListOfPostingList(listOfNotPostingArr, notQueryList.size());
+			Posting[] finalNotPosting = mergeListOfPostingList(listOfNotPostingArr, listOfNotPostingArr.size());
 			//			System.out.println("finalNotPosting: ");
 			//			for (Posting aPosting : finalNotPosting) {
 			//				System.out.println(aPosting);
@@ -194,8 +195,8 @@ public class BooleanRetrieval {
 	 * @return - Posting list of the query after NOT operator
 	 */
 	public Posting[] handleNotOperator(String pQuery) {
-		if (mDII.hasTerm(pQuery.substring(1))) { // if PII has the term
-			Posting[] postingList = mDII.getPositionPostings(pQuery.substring(1)); // The array of Posting object for this query, should be sorted by docID already
+		if (mDII.hasTerm(pQuery)) { // if PII has the term
+			Posting[] postingList = mDII.getPositionPostings(pQuery); // The array of Posting object for this query, should be sorted by docID already
 			ArrayList<Posting> listOfDocIdNotQuery = new ArrayList<Posting>(); // The list of docId's that do not contain the query (NOT query)
 			int postingListIndex = 0; // Starting index of the query's postingList
 			int postingListDocIdNum = postingList[postingListIndex].mDocID; // the starting docId in the query's posting list

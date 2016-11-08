@@ -125,4 +125,18 @@ public class KGramIndex implements Serializable {
 			}
 		}
 	}
+
+	public void clearGram(int k){
+		switch(k){
+			case 1:
+				oneGram.clear();
+				break;
+			case 2:
+				twoGram.clear();
+				break;
+			case 3:
+				threeGram.clear();
+				break;
+		}
+	}
 }

@@ -44,13 +44,14 @@ public class RankRetrievalsObject {
 	public void processQuery(String pQuery) {
 		String[] queriesArr = pQuery.split("\\s+");
 		for (String eachTerm : queriesArr) {
+			String stemEachTerm = PorterStemmer.processToken(eachTerm);
 			// W(q,t), Importance of the term in the query, W(q,t) = ln( 1 + (N/df(t) )
-			float weightOfTermInQuery 	= getWeightOfTermInQuery(eachTerm);
+			float weightOfTermInQuery 	= getWeightOfTermInQuery(stemEachTerm);
 			if (weightOfTermInQuery < 0.0f) {
 				continue;
 			}
 //			System.out.printf("W(q,%s): " + weightOfTermInQuery + "\n", eachTerm);
-			Pair<Integer>[]	postings 	= mDII.getDocListPosting(eachTerm);
+			Pair<Integer>[]	postings 	= mDII.getDocListPosting(stemEachTerm);
 //			// Get the Postings list of the term
 //			Posting[] postingList 		= new Posting[postings.length];
 //			for(int i = 0; i < postings.length; i++){
@@ -99,7 +100,7 @@ public class RankRetrievalsObject {
 			}
 		}
 
-		
+
 		if (topDocOnScorePQ.size() == 0) {
 			// If there is no result for rank retrieval
 			System.out.println("No document found");
@@ -130,11 +131,11 @@ public class RankRetrievalsObject {
 		// The the document frequency - counting the size of the posting of the term
 		// df(t) - Document frequency of the term (how many documents contain the term)
 		// If the term does not exist in the query
-		if (mDII.getDocListPosting(PorterStemmer.processToken(pTerm)) == null) {
-			return -0.1f;
+		if (mDII.getDocListPosting(pTerm) == null) {
+			return -5.0f;
 		}
 		else {
-			int docFreq = mDII.getDocListPosting(PorterStemmer.processToken(pTerm)).length;
+			int docFreq = mDII.getDocListPosting(pTerm).length;
 			// N - the total number of documents in collection
 			int N 		= mDII.getFileName().size();
 			// ln( 1 + (N / df(t)) )
@@ -142,7 +143,7 @@ public class RankRetrievalsObject {
 			return weightOfTermInQuery;
 		}
 	}
-	
+
 	/**
 	 * Update the accumulator HashMap that contains documentID and its score
 	 * @param pDocID
