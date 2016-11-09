@@ -13,26 +13,37 @@ public class DocumentReader {
 	KGramIndex				aKGI;
 	ArrayList<Article> 		mArticles;
 	private final int 		MIN_LENGTH = 3;
+	ArrayList<Double> 		mListOfLD;
 	/** For the weight of document **/
-	LinkedHashMap<Integer, HashMap<String,Integer>> docIdToTermToTermFreq; // docID --> (term --> termFreq)
+//	LinkedHashMap<Integer, HashMap<String,Integer>> docIdToTermToTermFreq; // docID --> (term --> termFreq)
 
 	public DocumentReader(PositionalInvertedIndex pPII, BiwordIndex pBI, KGramIndex pKGI){
 		mArticles 				= new ArrayList<Article>();
 		aPII 					= pPII;
 		aBI 					= pBI;
 		aKGI 					= pKGI;
-		docIdToTermToTermFreq 	= new LinkedHashMap<Integer, HashMap<String,Integer>>(); // docID --> (term --> termFreq)
+		mListOfLD				= new ArrayList<Double>();
+//		docIdToTermToTermFreq 	= new LinkedHashMap<Integer, HashMap<String,Integer>>(); // docID --> (term --> termFreq)
 	}
 
 	public void read(String path){
 		mJSONParser 		= new JSONSIFY(path);
 		Article aArticle 	= mJSONParser.read();
 
+		HashMap<String, Integer> termFreqs = new HashMap<String, Integer>();
 		mArticles.add(aArticle);
-		index(aArticle, mArticles.indexOf(aArticle));
+		index(aArticle, mArticles.indexOf(aArticle), termFreqs);
+
+		/** Calculate LD **/
+		double sum = 0;
+		for(Map.Entry<String, Integer> entry: termFreqs.entrySet()){
+			double termWeight =  1 + Math.log((double)entry.getValue());
+			sum += Math.pow(termWeight, 2);
+		}
+		mListOfLD.add(Math.sqrt(sum));
 	}
 
-	public void index(Article pArticle, int docID){
+	public void index(Article pArticle, int docID, HashMap<String, Integer> pTF){
 		TokenStream aTokenStream 	= new TokenStream(pArticle.body);
 		int positionIndex 			= 0;
 		String prevTerm 			= null; // use for biword indexing to keep track of the previous word
@@ -67,8 +78,10 @@ public class DocumentReader {
 					String[] listOfProcessedTokens 	= {tokenWithOutHyphen, firstWord, secondWord};
 
 					for (String eachProcessedToken : listOfProcessedTokens) {
-						aPII.addTerm(PorterStemmer.processToken(eachProcessedToken), docID, positionIndex);
-						addTermFreq(docID, PorterStemmer.processToken(eachProcessedToken));
+						String pStem = PorterStemmer.processToken(eachProcessedToken);
+						aPII.addTerm(pStem, docID, positionIndex);
+//						addTermFreq(docID, PorterStemmer.processToken(eachProcessedToken));
+						addTermFreq(pTF, pStem);
 					}
 					String stemFirst 	= PorterStemmer.processToken(firstWord.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
 					String stemSecond 	= PorterStemmer.processToken(secondWord.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase());
@@ -80,7 +93,8 @@ public class DocumentReader {
 				else {
 					stem = PorterStemmer.processToken(token.replaceAll("-", ""));
 					aPII.addTerm(stem, docID, positionIndex);
-					addTermFreq(docID, stem);
+//					addTermFreq(docID, stem);
+					addTermFreq(pTF, stem);
 					if(prevTerm != null){
 						aBI.addTerm( prevTerm,stem, docID);
 					}
@@ -90,7 +104,8 @@ public class DocumentReader {
 			} else {
 				stem = PorterStemmer.processToken(token);
 				aPII.addTerm(stem, docID, positionIndex);
-				addTermFreq(docID, stem);
+//				addTermFreq(docID, stem);
+				addTermFreq(pTF, stem);
 				if(prevTerm != null){
 					aBI.addTerm( prevTerm,stem, docID);
 				}
@@ -98,6 +113,14 @@ public class DocumentReader {
 			}
 			prevTerm = stem;
 			positionIndex++;
+		}
+	}
+
+	private void addTermFreq(HashMap<String, Integer> tf,String term){
+		if(tf.containsKey(term)){
+			tf.put(term,  tf.get(term)+1);
+		} else {
+			tf.put(term, 1);
 		}
 	}
 
@@ -109,50 +132,53 @@ public class DocumentReader {
 		return mArticles.size();
 	}
 
-	/** Weight Ranking Methods (Ld) starts **/
-
-	/**
-	 * Get array of Ld all of documents
-	 * @return
-	 */
-	public double[] getListOfLd() {
-		double[] listOfLd 	= new double[docIdToTermToTermFreq.size()];
-		int index 			= 0;
-
-		for (Map.Entry<Integer, HashMap<String, Integer>> eachEntry : docIdToTermToTermFreq.entrySet()) {
-			listOfLd[index] = getWeightOfDocument(eachEntry.getKey());
-			System.out.printf("Index: %d, Ld: %f\n", index, getWeightOfDocument(eachEntry.getKey()));
-			index++;
-		}
-		return listOfLd;
+	public ArrayList<Double> getListOfLD(){
+		return mListOfLD;
 	}
+//	/** Weight Ranking Methods (Ld) starts **/
+//
+//	/**
+//	 * Get array of Ld all of documents
+//	 * @return
+//	 */
+//	public double[] getListOfLd() {
+//		double[] listOfLd 	= new double[docIdToTermToTermFreq.size()];
+//		int index 			= 0;
+//
+//		for (Map.Entry<Integer, HashMap<String, Integer>> eachEntry : docIdToTermToTermFreq.entrySet()) {
+//			listOfLd[index] = getWeightOfDocument(eachEntry.getKey());
+//			System.out.printf("Index: %d, Ld: %f\n", index, getWeightOfDocument(eachEntry.getKey()));
+//			index++;
+//		}
+//		return listOfLd;
+//	}
 
-	/**
-	 * Get the Ld of each document (Ld)
-	 * @param pDocID
-	 * @return The Ld of the pDocID
-	 */
-	private double getWeightOfDocument(int pDocID) {
-
-		double sumOfWeightOfAllTerm 		= 0;
-		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); 			// Get all the HM of term --> termFreq
-
-		for (Map.Entry<String, Integer> eachEntry : termFreqHM.entrySet()) { 				// For each term in the document
-
-			int termFreqOfTermInDoc 		= eachEntry.getValue(); 						// Get the termFreq tf(t,d)
-//			System.out.printf("tf(%s,%d): %d\n", eachEntry.getKey(), pDocID, termFreqOfTermInDoc);
-			double weightOfDocOfTerm 		= 1.0 + Math.log(termFreqOfTermInDoc); 			// Get the W(d,t) = 1 + ln( tf(t,d) )
-//			System.out.printf("W(%d, %s): %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTerm);
-			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);				// Get the W(d,t)^2
-//			System.out.printf("W(%d, %s)^2: %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTermSquare);
-			sumOfWeightOfAllTerm 		   += weightOfDocOfTermSquare;
-//			System.out.printf("Sum of all weight: %f\n", sumOfWeightOfAllTerm);
-		}
-		
-		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
-//		System.out.printf("L(%d): %f\n", pDocID, Ld);
-		return Ld;
-	}
+//	/**
+//	 * Get the Ld of each document (Ld)
+//	 * @param pDocID
+//	 * @return The Ld of the pDocID
+//	 */
+//	private double getWeightOfDocument(int pDocID) {
+//
+//		double sumOfWeightOfAllTerm 		= 0;
+//		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID); 			// Get all the HM of term --> termFreq
+//
+//		for (Map.Entry<String, Integer> eachEntry : termFreqHM.entrySet()) { 				// For each term in the document
+//
+//			int termFreqOfTermInDoc 		= eachEntry.getValue(); 						// Get the termFreq tf(t,d)
+////			System.out.printf("tf(%s,%d): %d\n", eachEntry.getKey(), pDocID, termFreqOfTermInDoc);
+//			double weightOfDocOfTerm 		= 1.0 + Math.log(termFreqOfTermInDoc); 			// Get the W(d,t) = 1 + ln( tf(t,d) )
+////			System.out.printf("W(%d, %s): %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTerm);
+//			double weightOfDocOfTermSquare 	= Math.pow(weightOfDocOfTerm, 2.0);				// Get the W(d,t)^2
+////			System.out.printf("W(%d, %s)^2: %f\n", pDocID, eachEntry.getKey(), weightOfDocOfTermSquare);
+//			sumOfWeightOfAllTerm 		   += weightOfDocOfTermSquare;
+////			System.out.printf("Sum of all weight: %f\n", sumOfWeightOfAllTerm);
+//		}
+//
+//		double Ld = Math.sqrt(sumOfWeightOfAllTerm);
+////		System.out.printf("L(%d): %f\n", pDocID, Ld);
+//		return Ld;
+//	}
 
 //	public int getTermFreqOfDoc(String pTerm, int pDocID) {
 //		HashMap<String, Integer> termFreqHM = docIdToTermToTermFreq.get(pDocID);
@@ -160,27 +186,27 @@ public class DocumentReader {
 //		return termFreqHM.get(pTerm);
 //	}
 
-	/**
-	 * Add Term Frequency in the HashMap to the given pDocID
-	 * @param pDocID
-	 * @param pTerm
-	 */
-	private void addTermFreq(int pDocID, String pTerm) {
-		if (docIdToTermToTermFreq.containsKey(pDocID)) { // If the HM contains the docID already
-			HashMap<String, Integer> termToFreq = docIdToTermToTermFreq.get(pDocID); // Get the hashmap of term --> termFreq
-			if (termToFreq.containsKey(pTerm)) {
-				termToFreq.put(pTerm, termToFreq.get(pTerm) + 1); // Increment the termFreq of the term by 1
-			}
-			else {
-				termToFreq.put(pTerm, 1); // Set the termFreq of the term by 1
-			}
-		}
-		else {  // If HM does not contains docID already
-			HashMap<String, Integer> termToFreq = new HashMap<String, Integer>(); // Construct a new HM and put the term --> 1
-			termToFreq.put(pTerm, 1);
-			docIdToTermToTermFreq.put(pDocID, termToFreq);
-		}
-	}
+//	/**
+//	 * Add Term Frequency in the HashMap to the given pDocID
+//	 * @param pDocID
+//	 * @param pTerm
+//	 */
+//	private void addTermFreq(int pDocID, String pTerm) {
+//		if (docIdToTermToTermFreq.containsKey(pDocID)) { // If the HM contains the docID already
+//			HashMap<String, Integer> termToFreq = docIdToTermToTermFreq.get(pDocID); // Get the hashmap of term --> termFreq
+//			if (termToFreq.containsKey(pTerm)) {
+//				termToFreq.put(pTerm, termToFreq.get(pTerm) + 1); // Increment the termFreq of the term by 1
+//			}
+//			else {
+//				termToFreq.put(pTerm, 1); // Set the termFreq of the term by 1
+//			}
+//		}
+//		else {  // If HM does not contains docID already
+//			HashMap<String, Integer> termToFreq = new HashMap<String, Integer>(); // Construct a new HM and put the term --> 1
+//			termToFreq.put(pTerm, 1);
+//			docIdToTermToTermFreq.put(pDocID, termToFreq);
+//		}
+//	}
 
 	/** Weight Ranking Method (Ld) ends **/
 

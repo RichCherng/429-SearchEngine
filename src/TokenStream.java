@@ -28,6 +28,6 @@ public class TokenStream {
 	}
 
 	public static String process(String pWords){
-		return pWords.replaceAll("[^a-zA-Z0-9-]+" , "").toLowerCase();
+		return pWords.replaceAll("[^a-zA-Z0-9]+" , "").toLowerCase();
 	}
 }

@@ -52,8 +52,10 @@ public class RankRetrievalsObject {
 			if (weightOfTermInQuery < 0.0f) {
 				continue;
 			}
-			// System.out.printf("W(q,%s): " + weightOfTermInQuery + "\n", eachTerm);
+			 System.out.printf("W(q,%s): " + weightOfTermInQuery + "\n", eachTerm);
 			Pair<Integer>[]	postings 	= mDII.getDocListPosting(stemEachTerm);
+			System.out.println(postings.length);
+
 //			// Get the Postings list of the term
 //			Posting[] postingList 		= new Posting[postings.length];
 //			for(int i = 0; i < postings.length; i++){
@@ -118,7 +120,9 @@ public class RankRetrievalsObject {
 				}
 				else {
 					DocAndScorePair anObj = topDocOnScorePQ.poll();
-					System.out.println(rank + ". Document" + anObj.mDocID + " with accumulator value: " + anObj.mScore);
+//					System.out.println(rank + ". Document" + anObj.mDocID + " with accumulator value: " + anObj.mScore);
+					System.out.println(mDII.getFileName().get(anObj.mDocID) + " with accumulator value: " + anObj.mScore);
+
 					rank++;
 				}
 			}
@@ -140,10 +144,11 @@ public class RankRetrievalsObject {
 		}
 		else {
 			int docFreq = mDII.getDocListPosting(pTerm).length;
+			System.out.print("docFreq: " + docFreq);
 			// System.out.printf("df(%s) : %d\n", pTerm, docFreq);
 			// N - the total number of documents in collection
 			int N 		= mDII.getFileName().size();
-			// System.out.printf("N: %d\n", N);
+			 System.out.printf("N: %d\n", N);
 			// ln( 1 + (N / df(t)) )
 			float weightOfTermInQuery = (float) Math.log1p((float)N / (float)docFreq);
 			return weightOfTermInQuery;

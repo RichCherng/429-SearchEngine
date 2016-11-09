@@ -25,7 +25,7 @@ public class IndexWriter {
 	 * Saving index, generating three files: Posting Index, vocabulary list, and vocabulary table.
 	 * @param pPII
 	 */
-	public void writeToDisk(String pDirectory, PositionalInvertedIndex pPII, double[] pLds){
+	public void writeToDisk(String pDirectory, PositionalInvertedIndex pPII, ArrayList<Double> pLds){
 		System.out.println("Wrting index to disk...");
 		String[] dictionary 	= pPII.getSortedListOfVocab();
 		long[] vocabPositions 	= new long[dictionary.length];
@@ -36,7 +36,7 @@ public class IndexWriter {
 		System.out.println("Saved Index to Disk");
 	}
 
-	private void buildDocWeightFile(String pDIr, double[] pLds){
+	private void buildDocWeightFile(String pDIr, ArrayList<Double> pLds){
 		FileOutputStream docWeightFileWriter = null;
 
 		try {
