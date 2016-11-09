@@ -33,11 +33,11 @@ public class Main {
 				aDII 		= new DiskInvertedIndex(dir);
 
 //				for(String f: aDII.getFileName()){
-				for(int i = 0; i < aDII.getFileName().size(); i++){
-	                  if(aDII.getFileName().get(i).equals("28151BadlandsNationalParkLandscapes.json")){
-	                	  System.out.println(aDII.getFileName().get(i) + " " + aDII.getDocWeight(i));
-	                  }
-				}
+//				for(int i = 0; i < aDII.getFileName().size(); i++){
+//	                  if(aDII.getFileName().get(i).equals("28151BadlandsNationalParkLandscapes.json")){
+//	                	  System.out.println(aDII.getFileName().get(i) + " " + aDII.getDocWeight(i));
+//	                  }
+//				}
 				/** Read Serialized Objects **/
 				try {
 					System.out.println("Loading Bi-word index...");
