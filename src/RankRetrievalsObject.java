@@ -121,8 +121,8 @@ public class RankRetrievalsObject {
 				else {
 					DocAndScorePair anObj = topDocOnScorePQ.poll();
 //					System.out.println(rank + ". Document" + anObj.mDocID + " with accumulator value: " + anObj.mScore);
-					System.out.println(mDII.getFileName().get(anObj.mDocID) + " with accumulator value: " + anObj.mScore);
-
+//					System.out.println("DocId: " + anObj.mDocID + "\t" + mDII.getFileName().get(anObj.mDocID) + " with accumulator value: " + anObj.mScore);
+					System.out.printf("DocID: %d\t%-60s Accumulator value: %f%n", anObj.mDocID, mDII.getFileName().get(anObj.mDocID), anObj.mScore);
 					rank++;
 				}
 			}
