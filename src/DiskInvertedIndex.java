@@ -92,7 +92,7 @@ public class DiskInvertedIndex {
 		long postingsPosition = binarySearchVocabulary(term);
 		return postingsPosition > -1;
 	}
-	
+
 	private static Posting[] readPostingsFromFile(RandomAccessFile postings, long postingsPosition){
 		try{
 			// seek to the position in the file where the postings start.
@@ -203,9 +203,12 @@ public class DiskInvertedIndex {
 	               // only process .txt files
 	               if (file.toString().endsWith(".json")) {
 	                  names.add(file.toFile().getName());
+	                  mDocumentID++;
 	               }
+//	               System.out.println(mDocumentID);
 	               return FileVisitResult.CONTINUE;
 	            }
+
 
 	            // don't throw exceptions if files are locked/other errors occur
 	            public FileVisitResult visitFileFailed(Path file,

@@ -32,6 +32,12 @@ public class Main {
 				String dir  = reader.nextLine();
 				aDII 		= new DiskInvertedIndex(dir);
 
+//				for(String f: aDII.getFileName()){
+				for(int i = 0; i < aDII.getFileName().size(); i++){
+	                  if(aDII.getFileName().get(i).equals("28151BadlandsNationalParkLandscapes.json")){
+	                	  System.out.println(aDII.getFileName().get(i) + " " + aDII.getDocWeight(i));
+	                  }
+				}
 				/** Read Serialized Objects **/
 				try {
 					System.out.println("Loading Bi-word index...");
@@ -52,6 +58,8 @@ public class Main {
 					System.out.println("Failed Processing Serialized files");
 				}
 				System.out.println("Loading index completed");
+//				int docFreq = aDII.getDocListPosting("fire").length;
+//				System.out.println(Math.log(1 + ((float)aDII.getFileName().size())/(float)docFreq));
 				QueryParser querie =  new QueryParser(aDII, aBI, aSC, dir);
 				querie.richRun();
 
@@ -80,13 +88,14 @@ public class Main {
 
 		/*** Write To Disk ****/
 		IndexWriter diskWriter = new IndexWriter();
-		diskWriter.writeToDisk(folder, aPII, docReader.getListOfLd());
+		diskWriter.writeToDisk(folder, aPII, docReader.getListOfLD());
+//		System.out.println(docReader.getListOfLD().size());
 
 		try {
 			System.out.println("Saving bi-word index to disk...");
 			// Write Bi-Word
 			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(folder+"/biword.bin"));
-			out.writeObject(aBI);
+//			out.writeObject(aBI);
 			out.close();
 
 			System.out.println("Saving k-gram index to disk...");
